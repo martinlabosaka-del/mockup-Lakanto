@@ -1,0 +1,2893 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>糖質疲労Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:       #CC2010;
+      --teal-light: #FFE8E5;
+      --navy:       #6B1010;
+      --orange:     #E87820;
+      --offwhite:   #F8F2F2;
+      --cream:      #F2E5E5;
+      --gray:       #7A7070;
+      --gray-light: #E8D8D8;
+      --white:      #FFFDF8;
+      --accent:     #CC2010;
+      --accent-light: #FFE8E5;
+      --gold:       #D4A500;
+      --dark-bg:    #2E1010;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      color: #2E1010;
+      background: var(--offwhite);
+      font-size: 16px;
+      line-height: 1.8;
+      word-break: auto-phrase;
+      overflow-x: hidden;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes floatDecoTop {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes floatDecoBottom {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(10px); }
+    }
+
+    @keyframes sway {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(4deg); }
+      50% { transform: rotate(0deg); }
+      75% { transform: rotate(-4deg); }
+    }
+
+    @keyframes clickerMove {
+      0% {
+        transform: translate(250px, 80px);
+        opacity: 0;
+      }
+      18% {
+        opacity: 1;
+      }
+      35% {
+        transform: translate(0, 60px);
+      }
+      50% {
+        transform: translate(0, 60px) scale(0.9);
+      }
+      65% {
+        transform: translate(0, 60px);
+      }
+      82% {
+        opacity: 1;
+      }
+      100% {
+        transform: translate(250px, 80px);
+        opacity: 0;
+      }
+    }
+
+    @keyframes clickerRotate {
+      0%, 45% { transform: rotate(0deg); }
+      50% { transform: rotate(-25deg); }
+      55%, 100% { transform: rotate(0deg); }
+    }
+
+    @keyframes bannerPulse {
+      0%, 35% {
+        filter: brightness(1) saturate(1);
+        box-shadow: 0 6px 24px rgba(200,24,16,0.35);
+      }
+      50% {
+        filter: brightness(1.4) saturate(1.3);
+        box-shadow: 0 12px 48px rgba(255,200,0,0.7);
+      }
+      65%, 100% {
+        filter: brightness(1) saturate(1);
+        box-shadow: 0 6px 24px rgba(200,24,16,0.35);
+      }
+    }
+
+    .animate-fade { opacity: 0; }
+    .animate-fade.active { animation: fadeInUp 0.8s ease-out forwards; }
+    .animate-slide-left { opacity: 0; }
+    .animate-slide-left.active { animation: slideInLeft 0.8s ease-out forwards; }
+    .animate-slide-right { opacity: 0; }
+    .animate-slide-right.active { animation: slideInRight 0.8s ease-out forwards; }
+    .animate-scale { opacity: 0; }
+    .animate-scale.active { animation: scaleIn 0.8s ease-out forwards; }
+
+    .deco-float-top { animation: floatDecoTop 4s ease-in-out infinite; }
+    .deco-float-bottom { animation: floatDecoBottom 4s ease-in-out infinite; }
+
+    /* Animation delays */
+    .animate-fade:nth-child(2).active,
+    .card:nth-child(2),
+    .sns-card:nth-child(2),
+    .event-card:nth-child(2) {
+      animation-delay: 0.1s !important;
+    }
+
+    .animate-fade:nth-child(3).active,
+    .card:nth-child(3),
+    .sns-card:nth-child(3),
+    .event-card:nth-child(3) {
+      animation-delay: 0.2s !important;
+    }
+
+    .animate-fade:nth-child(4).active,
+    .card:nth-child(4),
+    .sns-card:nth-child(4),
+    .event-card:nth-child(4) {
+      animation-delay: 0.3s !important;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(248, 242, 242, 0.98);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid rgba(204, 32, 16, 0.15);
+      z-index: 1000;
+      padding: 12px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-weight: 700;
+    }
+
+    .logo-en { font-size: 16px; color: var(--accent); font-weight: 700; }
+    .logo-ja { font-size: 11px; color: var(--gray); }
+
+    .btn-nav-purchase {
+      background: var(--accent);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 24px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(204, 32, 16, 0.25);
+    }
+
+    .btn-nav-purchase:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(204, 32, 16, 0.4);
+    }
+
+    /* ===== HERO SECTION ===== */
+    #hero {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      aspect-ratio: 16/9;
+      min-height: 300px;
+      z-index: 1;
+      overflow: hidden;
+      padding: 0;
+    }
+
+    .hero-video-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 48px;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-video-placeholder iframe {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Hero Banner */
+    .hero-banner-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 25%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+      z-index: 5;
+    }
+
+    .hero-banner {
+      width: 100%;
+      background: linear-gradient(120deg, #c8101a 0%, #e21f28 100%);
+      padding: clamp(1px, 0.3vw, 4px) clamp(20px, 4vw, 60px) clamp(5px, 1vw, 12px);
+      transform: translateY(100%) rotateZ(-2.5deg);
+      transform-origin: center center;
+      border: none;
+      z-index: 5;
+    }
+
+    .hero-banner-text {
+      color: white;
+      font-size: clamp(26px, 5vw, 50px);
+      font-weight: 900;
+      font-style: italic;
+      line-height: 1.2;
+      text-align: center;
+      letter-spacing: 0.05em;
+      opacity: 0;
+      animation: none;
+      white-space: nowrap;
+    }
+
+    @keyframes heroTextBlink {
+      0% { opacity: 1; }
+      20% { opacity: 0; }
+      40% { opacity: 1; }
+      60% { opacity: 0; }
+      80% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 1; }
+    }
+
+    .hero-banner-text.active {
+      animation: heroTextBlink 1.2s ease-in-out forwards;
+    }
+
+    /* ===== SECTION COMMON ===== */
+    section { position: relative; z-index: 2; }
+
+    section:not(#hero):not(#section-7) { padding: 40px 0; }
+
+    .section-title {
+      font-size: 48px;
+      font-weight: 700;
+      color: #2E1010;
+      margin: 0 auto 40px;
+      position: relative;
+      display: block;
+      text-align: center;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    .section-title.text-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+
+    .section-title .marker {
+      position: relative;
+      font-weight: 800;
+      color: var(--accent);
+      background: linear-gradient(transparent 58%, #ffe14d 58%, #ffd21a 100%);
+      padding: 0 0.12em;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+
+    /* 全角約物「」！の字間を詰める */
+    .punct-tight {
+      font-feature-settings: 'palt' 1;
+      letter-spacing: 0.25em;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.14em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+
+    .section-label::before,
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), rgba(204,32,16,0.4));
+      border-radius: 999px;
+    }
+
+    .section-label--center {
+      justify-content: center;
+      max-width: 320px;
+      margin: 0 auto 20px;
+    }
+
+    .section-label--center::before,
+    .section-label--center::after {
+      flex: 0 0 40px;
+    }
+
+    .section-sub {
+      font-size: 16px;
+      color: var(--gray);
+      max-width: 600px;
+      line-height: 1.8;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    /* ===== SECTION 1: INTERVIEW ===== */
+    #section-1 {
+      background: var(--white);
+      position: relative;
+      z-index: 2;
+      margin-top: max(56.25vw, 300px);
+      padding-bottom: 0 !important;
+    }
+
+    .interview-wrap {
+      display: grid;
+      grid-template-columns: 1.2fr 320px;
+      gap: 56px;
+      align-items: stretch;
+      padding: 0;
+      position: relative;
+      z-index: 10;
+    }
+
+    .section1-graph {
+      display: block;
+      width: 100%;
+      max-width: 1100px;
+      height: auto;
+      margin: 40px auto 0;
+    }
+
+    .interview-player {
+      border-radius: 0;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .interview-thumbnail {
+      background: linear-gradient(135deg, #1a0808 0%, #2e1010 50%, #1a0808 100%);
+      aspect-ratio: 16/9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      position: relative;
+      transition: box-shadow 0.3s;
+    }
+
+    .interview-player:hover .interview-thumbnail {
+      box-shadow: inset 0 0 40px rgba(255,255,255,0.15);
+    }
+
+    .interview-title {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 24px;
+      color: rgba(255,255,255,0.95);
+      text-align: center;
+      line-height: 1.6;
+      font-weight: 700;
+    }
+
+    .play-btn {
+      width: 96px;
+      height: 96px;
+      background: var(--teal);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s, background 0.3s;
+      box-shadow: 0 0 0 16px rgba(204,32,16,0.2);
+    }
+
+    .interview-player:hover .play-btn {
+      transform: scale(1.12);
+      background: #E03020;
+    }
+
+    .play-btn::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-top: 18px solid transparent;
+      border-bottom: 18px solid transparent;
+      border-left: 28px solid white;
+      margin-left: 8px;
+    }
+
+    .interview-duration {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .interview-doctor-card {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 20px;
+      text-align: center;
+    }
+
+    .interview-doctor-photo {
+      width: 100%;
+      aspect-ratio: 1/1;
+      border-radius: 16px;
+      border: 4px solid var(--accent);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .interview-doctor-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+    }
+
+    .doctor-name {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #2E1010;
+    }
+
+    .doctor-title {
+      font-size: 13px;
+      color: var(--gray);
+      line-height: 1.7;
+    }
+
+    .doctor-book {
+      font-size: 13px;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    /* ===== SECTION 2: BLOOD SUGAR GRAPH ===== */
+    #section-2 {
+      background: var(--white);
+      padding-top: 20px !important;
+    }
+
+    .section-2-title {
+      font-size: 56px;
+      font-weight: 700;
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 80px;
+      letter-spacing: -0.02em;
+      position: relative;
+      display: block;
+    }
+
+    .section-2-title::after {
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: -28px;
+      height: 6px;
+      width: 120px;
+    }
+
+    .sugar-fatigue-group {
+      background: transparent;
+      padding: 0;
+    }
+
+    .medical-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 72px;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+
+    .graph-box {
+      background: transparent;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
+      border: none;
+    }
+
+    .graph-title {
+      font-size: 13px;
+      color: var(--gray);
+      margin-bottom: 6px;
+      text-align: right;
+    }
+
+    .graph-area {
+      position: relative;
+      height: 660px;
+      margin: 24px 0;
+    }
+
+    svg.graph-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    /* ── SVG Graph Styles ── */
+    .axis-line {
+      stroke: #1a1a1a;
+      stroke-width: 2;
+    }
+
+    .grid-line {
+      stroke: #ddd;
+      stroke-width: 0.8;
+      stroke-dasharray: 4 4;
+    }
+
+    .threshold-line {
+      stroke: #3b82f6;
+      stroke-width: 1.2;
+      stroke-dasharray: 6 4;
+      opacity: 0.6;
+    }
+
+    .spike-path {
+      fill: none;
+      stroke: #d42a2a;
+      stroke-width: 3.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .normal-path {
+      fill: none;
+      stroke: #333;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 8 6;
+    }
+
+    .spike-fill {
+      opacity: 0;
+    }
+
+    .label-text {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 700;
+      opacity: 0;
+    }
+
+    .arrow-group {
+      opacity: 0;
+    }
+
+    .meal-label {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .axis-label {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 12px;
+      fill: #666;
+    }
+
+    .meal-bg {
+      rx: 4;
+      ry: 4;
+    }
+
+    .steps-list {
+      list-style: none;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--gray-light);
+    }
+
+    .step-item:last-child {
+      border-bottom: none;
+    }
+
+    .step-num {
+      background: linear-gradient(135deg, var(--accent), var(--orange));
+      color: var(--white);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(204,32,16,0.3);
+    }
+
+    .step-text {
+      font-size: 16px;
+      font-weight: 500;
+      padding-top: 6px;
+      color: #2E1010;
+    }
+
+    .step-result {
+      background: linear-gradient(120deg, #C01818 0%, var(--orange) 100%);
+      color: var(--white);
+      padding: 16px 32px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      margin-top: 28px;
+      box-shadow: 0 6px 20px rgba(217,32,32,0.3);
+    }
+
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 28px;
+      margin-top: 40px;
+      align-items: start;
+    }
+
+    .card {
+      text-align: left;
+      position: relative;
+    }
+
+    .card-image {
+      display: block;
+      width: 100%;
+      max-width: 200px;
+      height: auto;
+      margin: 0 0 16px;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 2.8em;
+      font-size: 23px;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    .card-num {
+      flex-shrink: 0;
+      width: 1.5em;
+      height: 1.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 4px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .card-text {
+      flex: 1;
+    }
+
+
+    /* ===== SECTION 4: BANNER ===== */
+    #section-4 {
+      padding: 40px 0 !important;
+      background: var(--white);
+      position: relative;
+    }
+
+    .banner-container {
+      position: relative;
+      width: 100%;
+      min-height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    .banner-click-cursor {
+      position: absolute;
+      width: 42px;
+      height: 48px;
+      pointer-events: none;
+      z-index: 10;
+      animation: clickerMove 4s linear infinite;
+    }
+
+    .banner-click-cursor::before {
+      content: '';
+      display: block;
+      width: 42px;
+      height: 48px;
+      background: url('sozai/arrow.png') no-repeat center / contain;
+      position: absolute;
+      top: 0;
+      left: 0;
+      animation: clickerRotate 4s ease-in-out infinite;
+    }
+
+    .banner-strip {
+      background: linear-gradient(120deg, #A81010 0%, var(--orange) 60%, #E03030 100%);
+      color: var(--white);
+      padding: 28px 56px;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      box-shadow: 0 12px 48px rgba(200,24,16,0.4);
+      letter-spacing: 0.02em;
+      clip-path: polygon(20px 0%, calc(100% - 20px) 0%, 100% 50%, calc(100% - 20px) 100%, 20px 100%, 0% 50%);
+      margin: 0 auto;
+      display: block;
+      width: 90%;
+      max-width: 1200px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      animation: bannerPulse 4s linear infinite;
+      line-height: 1.6;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+
+    .banner-text-small {
+      font-size: 24px;
+      opacity: 0.95;
+    }
+
+    .banner-text-large {
+      font-size: 39px;
+      font-weight: 800;
+    }
+
+    .banner-strip:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 56px rgba(200,24,16,0.5);
+    }
+
+    /* ===== SECTION 5: WHAT IS LAKANTO ===== */
+    #section-5 {
+      background: transparent;
+      color: white;
+      position: relative;
+      overflow: visible;
+    }
+
+    #section-5::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0.55) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    #section-5 > .container {
+      position: relative;
+      z-index: 3;
+      margin-top: 0;
+    }
+
+    /* Hero visual - background */
+    .lakanto-visual {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .lakanto-visual-img {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      z-index: 0;
+    }
+
+    .lakanto-visual-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 25%;
+    }
+
+    .lakanto-visual::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(107, 166, 0, 0.2) 0%, transparent 70%);
+      border-radius: 0;
+      pointer-events: none;
+      animation: glowPulseGreen 5s ease-in-out infinite;
+      z-index: 1;
+    }
+
+    @keyframes glowPulseGreen {
+      0%, 100% {
+        opacity: 0.3;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
+
+    /* Title overlay on hero */
+    .lakanto-title-section {
+      position: relative;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4;
+      padding: 0 24px 40px;
+    }
+
+    .lakanto-deco-side {
+      display: none;
+    }
+
+    .lakanto-deco-top,
+    .lakanto-deco-bottom {
+      display: none;
+    }
+
+    .lakanto-title-content {
+      max-width: 900px;
+      text-align: center;
+      pointer-events: auto;
+    }
+
+    .lakanto-title-content .section-title {
+      color: white;
+      font-size: 64px;
+      margin-bottom: 28px;
+      font-weight: 900;
+      line-height: 1.15;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      letter-spacing: 0.02em;
+    }
+
+    .lakanto-title-content .section-title::after {
+      display: none;
+    }
+
+    .lakanto-title-content .section-sub {
+      color: rgba(255,255,255,0.95);
+      font-size: 18px;
+      line-height: 1.8;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      letter-spacing: 0.05em;
+      text-align: center;
+      max-width: none;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .section-label--center {
+      color: white;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 0.3em;
+      text-shadow: none;
+      margin-bottom: 24px;
+      display: block;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--orange), #d4600f);
+      padding: 14px 30px;
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0;
+    }
+
+    /* Layout - products grid + info */
+    .lakanto-layout {
+      display: block;
+      padding-top: 0;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Info section */
+    .lakanto-info-section {
+      max-width: 980px;
+      margin: 0 auto;
+      background: rgba(6, 18, 10, 0.7);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0;
+      padding: 26px 28px;
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 28px 64px rgba(0,0,0,0.5);
+      position: relative;
+      z-index: 11;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    .lakanto-info-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--orange);
+      letter-spacing: 0.14em;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+
+    .lakanto-info-title {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 39px;
+      font-weight: 900;
+      margin-bottom: 20px;
+      line-height: 1.4;
+      color: white;
+      text-align: left;
+    }
+
+    .lakanto-info-body {
+      font-size: 20px;
+      color: rgba(255,255,255,0.85);
+      line-height: 1.9;
+      margin-bottom: 0;
+      text-align: left;
+    }
+
+    .lakanto-features {
+      list-style: none;
+      margin-bottom: 0;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .lakanto-feature {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 16px;
+      align-items: center;
+      text-align: left;
+      padding: 18px 22px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 0;
+    }
+
+    .lakanto-feature-check {
+      grid-column: 1;
+      grid-row: 1 / 3;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--orange), #d4600f);
+      color: white;
+      font-weight: 700;
+      font-size: 28px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(232,120,32,0.45);
+    }
+
+    .lakanto-feature-title {
+      font-size: 21px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .lakanto-feature-desc {
+      font-size: 17px;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.6;
+    }
+
+    /* ===== SECTION 6: SNS / INFLUENCERS ===== */
+    #section-6 {
+      background: url('sozai/background/3632520_m.jpg') center/cover no-repeat, var(--white);
+      background-attachment: fixed;
+    }
+
+    /* 見出しリボン帯（section-6） */
+    .ribbon-heading {
+      text-align: center;
+      margin: 0 auto 40px;
+    }
+
+    .ribbon-heading .ribbon {
+      position: relative;
+      display: inline-block;
+    }
+
+    #section-6 .ribbon-heading .section-title {
+      position: relative;
+      margin: 0;
+      color: #fff;
+      background: linear-gradient(120deg, #c8101a 0%, #e21f28 100%);
+      padding: 16px 48px;
+      border-radius: 4px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+      text-shadow: none;
+      z-index: 2;
+    }
+
+    .ribbon-heading .ribbon::before,
+    .ribbon-heading .ribbon::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      z-index: 1;
+    }
+
+    .ribbon-heading .ribbon::before {
+      left: -2px;
+      border-width: 0 18px 12px 0;
+      border-color: transparent #8c0c12 transparent transparent;
+    }
+
+    .ribbon-heading .ribbon::after {
+      right: -2px;
+      border-width: 0 0 12px 18px;
+      border-color: transparent transparent transparent #8c0c12;
+    }
+
+    .sns-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 28px;
+      margin-bottom: 0;
+      margin-top: 60px;
+    }
+
+    .sns-card {
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .sns-card:hover {
+      transform: translateY(-12px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.16);
+    }
+
+    .sns-video {
+      aspect-ratio: 9/16;
+      background: linear-gradient(160deg, #1a3a4a 0%, #0d2e3a 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      position: relative;
+    }
+
+    .sns-video--warm {
+      background: linear-gradient(160deg, #3a1010 0%, #2e1010 100%);
+    }
+
+    .sns-video--green {
+      background: linear-gradient(160deg, #1e0808 0%, #100404 100%);
+    }
+
+    .sns-video--purple {
+      background: linear-gradient(160deg, #3a0808 0%, #200404 100%);
+    }
+
+    .sns-emoji {
+      font-size: 48px;
+    }
+
+    .sns-play {
+      width: 52px;
+      height: 52px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .sns-play::after {
+      content: '';
+      width: 0;
+      height: 0;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-left: 16px solid white;
+      margin-left: 3px;
+    }
+
+    .sns-meta {
+      padding: 16px 16px;
+      background: var(--white);
+    }
+
+    .sns-role {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .sns-name {
+      font-size: 14px;
+      font-weight: 700;
+      margin: 4px 0;
+      color: #2E1010;
+    }
+
+    .sns-hash {
+      font-size: 12px;
+      color: var(--gray);
+    }
+
+    /* ===== SECTION 7: RECIPE GALLERY ===== */
+    #section-7 {
+      padding: 12px 0 40px;
+      background: #6BA600;
+      position: relative;
+      overflow: visible;
+    }
+
+    .recipe-gallery {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow: visible;
+    }
+
+    .recipe-row {
+      display: flex;
+      gap: 20px;
+      overflow: hidden;
+      width: 11172px;
+      height: auto;
+    }
+
+    .recipe-row--top {
+      animation: slideRight 220s linear infinite;
+    }
+
+    .recipe-row--bottom {
+      animation: slideLeft 220s linear infinite;
+    }
+
+    @keyframes slideLeft {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-5635px); }
+    }
+
+    @keyframes slideRight {
+      0% { transform: translateX(-5635px); }
+      100% { transform: translateX(0); }
+    }
+
+    .recipe-item {
+      flex: 0 0 315px;
+      aspect-ratio: 1200/800;
+      border: none;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+
+    .recipe-item {
+      position: relative;
+    }
+
+
+    .recipe-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ===== SECTION DECORATION ===== */
+    .wave-decoration {
+      width: 100%;
+      height: 80px;
+      background: white;
+      position: relative;
+      z-index: 3;
+    }
+
+    .wave-decoration svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .herb-decoration {
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(to bottom, #ffffff 0%, #6BA600 100%);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3;
+    }
+
+    .herb-decoration svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* ナイフ＆フォークの区切りライン */
+    .knife-fork-decoration {
+      width: 100%;
+      background: #6BA600;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      padding: 28px 60px;
+      position: relative;
+      z-index: 3;
+    }
+
+    .knife-fork-decoration::before,
+    .knife-fork-decoration::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.15), #ffffff);
+    }
+
+    .knife-fork-decoration::after {
+      background: linear-gradient(90deg, #ffffff, rgba(255,255,255,0.15));
+    }
+
+    .knife-fork-emblem {
+      flex: 0 0 auto;
+      line-height: 0;
+    }
+
+    .knife-fork-emblem img {
+      height: 64px;
+      width: auto;
+      display: block;
+      filter: brightness(0) invert(1);
+    }
+
+    .gradient-dot-decoration {
+      width: 100%;
+      height: 100px;
+      background: linear-gradient(to bottom, #6BA600 0%, #6BA600 100%);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      padding: 0;
+      z-index: 3;
+    }
+
+    .dot-group {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      opacity: 0.6;
+    }
+
+    .dot.large {
+      width: 32px;
+      height: 32px;
+      opacity: 0.8;
+    }
+
+    .dot.small {
+      width: 16px;
+      height: 16px;
+      opacity: 0.4;
+    }
+
+    .gradient-dot-decoration-red {
+      width: 100%;
+      height: 100px;
+      background: linear-gradient(to bottom, #d42a2a 0%, #d42a2a 100%);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      padding: 0;
+      z-index: 3;
+    }
+
+    .dot-red {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      opacity: 0.6;
+    }
+
+    .dot-red.large {
+      width: 32px;
+      height: 32px;
+      opacity: 0.8;
+    }
+
+    .dot-red.small {
+      width: 16px;
+      height: 16px;
+      opacity: 0.4;
+    }
+
+    .recipe-link-wrapper {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .recipe-link-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      color: #6BA600;
+      padding: 32px 72px;
+      border-radius: 999px;
+      font-size: 42px;
+      font-weight: 900;
+      text-decoration: none;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      letter-spacing: 0.05em;
+    }
+
+    .recipe-link-btn:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+
+    /* ===== SECTION 8: PURCHASE ===== */
+    #section-8 {
+      background: linear-gradient(135deg, #6B1010 0%, #2e1010 100%);
+      padding: 140px 0;
+    }
+
+    .trial-inner {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .trial-product {
+      background: rgba(255,255,255,0.08);
+      border-radius: 32px;
+      padding: 48px 40px;
+      text-align: center;
+      border: 2px solid rgba(255,255,255,0.12);
+      box-shadow: 0 12px 48px rgba(0,0,0,0.3);
+    }
+
+    .trial-product-img {
+      width: 280px;
+      height: 340px;
+      border-radius: 20px;
+      margin: 0 auto 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: rgba(255,255,255,0.04);
+      position: relative;
+      z-index: 1;
+    }
+
+    .trial-product-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .trial-product-name {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 26px;
+      color: white;
+      font-weight: 700;
+      margin-bottom: 40px;
+    }
+
+    .trial-product-desc {
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 28px;
+      line-height: 1.7;
+    }
+
+    .trial-price-wrap {
+      margin-bottom: 12px;
+    }
+
+    .trial-price {
+      font-family: 'Inter', sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--orange);
+      line-height: 1;
+    }
+
+    .trial-price span {
+      font-size: 20px;
+    }
+
+    .trial-price-sub {
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .trial-content {
+      color: white;
+    }
+
+    .trial-title {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 32px;
+      color: white;
+    }
+
+
+    .trial-points {
+      list-style: none;
+      margin-bottom: 40px;
+    }
+
+    .trial-point {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      font-size: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .trial-point:last-child {
+      border-bottom: none;
+    }
+
+    .trial-point-icon {
+      color: var(--orange);
+      font-weight: 700;
+      flex-shrink: 0;
+      font-size: 20px;
+    }
+
+    .trial-ctas {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .btn-purchase-lg {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--orange);
+      color: white;
+      padding: 20px 44px;
+      border-radius: 999px;
+      font-size: 18px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0 8px 28px rgba(232,120,32,0.4);
+      text-align: center;
+    }
+
+    .btn-purchase-lg:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(232,120,32,0.5);
+    }
+
+    .btn-outline-white-sm {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: transparent;
+      color: rgba(255,255,255,0.9);
+      border: 2px solid rgba(255,255,255,0.3);
+      padding: 14px 32px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .btn-outline-white-sm:hover {
+      border-color: white;
+      color: white;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .trial-note {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .section-label--trial {
+      color: rgba(255,255,255,0.6);
+      font-size: 24px;
+    }
+
+    /* ===== SECTION 8 REDESIGN: NEW ELEMENTS ===== */
+
+    /* Section header */
+    .section-8-main-title {
+      font-size: 48px;
+      font-weight: 900;
+      color: white;
+      text-align: center;
+      margin-bottom: 40px;
+      line-height: 1.4;
+    }
+
+    .section-8-main-title span {
+      font-size: 0.6em;
+      opacity: 0.8;
+    }
+
+    /* Proof numbers bar */
+    .proof-numbers {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 40px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 40px 60px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .proof-num-item {
+      text-align: center;
+      padding: 0 48px;
+    }
+
+    .proof-num {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-size: 56px;
+      font-weight: 700;
+      color: var(--orange);
+      line-height: 1;
+    }
+
+    .proof-num small {
+      font-size: 0.4em;
+      font-weight: 700;
+    }
+
+    .proof-label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 8px;
+      display: block;
+    }
+
+    .proof-num-divider {
+      width: 1px;
+      height: 80px;
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* Enhanced product card effects */
+    .trial-product {
+      position: relative;
+      overflow: visible;
+    }
+
+    .trial-product::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(232,120,32,0.25) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: glowPulse 3s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% {
+        opacity: 0.4;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.15);
+      }
+    }
+
+    /* Anchor price */
+    /* Trust badges */
+    .trust-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+
+    .trust-badge {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.85);
+    }
+
+    /* CTA pulse animation */
+    @keyframes ctaPulse {
+      0%, 100% {
+        box-shadow: 0 8px 28px rgba(232,120,32,0.4);
+      }
+      50% {
+        box-shadow: 0 8px 48px rgba(232,120,32,0.75), 0 0 0 8px rgba(232,120,32,0.15);
+      }
+    }
+
+    .btn-purchase-lg {
+      animation: ctaPulse 2.5s ease-in-out infinite;
+    }
+
+    /* Weaken secondary CTA */
+    .btn-outline-white-sm {
+      opacity: 0.6;
+      font-size: 13px;
+    }
+
+    /* Product lineup section */
+    .product-lineup-section {
+      margin-top: 40px;
+    }
+
+    .product-lineup-label {
+      text-align: center;
+      color: rgba(255,255,255,0.6);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+
+    .product-lineup-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .product-lineup-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 28px 20px;
+      text-align: center;
+      transition: transform 0.3s, background 0.3s;
+      position: relative;
+    }
+
+    .product-lineup-card:hover {
+      transform: translateY(-6px);
+      background: rgba(255,255,255,0.1);
+    }
+
+    .product-lineup-card.featured {
+      border-color: var(--orange);
+      border-width: 2px;
+    }
+
+    .lineup-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--orange);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .lineup-img {
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .lineup-img img {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
+    .lineup-name {
+      font-size: 14px;
+      color: rgba(255,255,255,0.85);
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .lineup-cta {
+      display: inline-block;
+      padding: 8px 20px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 999px;
+      font-size: 12px;
+      color: white;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+
+    .lineup-cta:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* ===== SECTION 9: EVENTS ===== */
+    #section-9 {
+      background: var(--white);
+    }
+
+    #section-9 .section-title {
+      margin-bottom: 28px;
+    }
+
+    .events-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-top: 0;
+    }
+
+    .event-card {
+      background: linear-gradient(135deg, var(--white) 0%, rgba(248,242,242,0.5) 100%);
+      border-radius: 28px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+      border: 2px solid var(--gray-light);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .event-card:hover {
+      transform: translateY(-12px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.12);
+    }
+
+    .event-badge {
+      display: inline-block;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+
+    .badge-popup {
+      background: var(--teal-light);
+      color: var(--teal);
+    }
+
+    .event-title {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.5;
+      color: #2E1010;
+    }
+
+    .event-info {
+      list-style: none;
+      margin-bottom: 24px;
+    }
+
+    .event-info li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 15px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--gray-light);
+    }
+
+    .event-info li:last-child {
+      border-bottom: none;
+    }
+
+    .event-info-icon {
+      flex-shrink: 0;
+      font-size: 16px;
+    }
+
+    .event-desc {
+      font-size: 15px;
+      color: var(--gray);
+      margin-bottom: 20px;
+      line-height: 1.8;
+    }
+
+    .btn-event {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .btn-event:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-event-teal {
+      background: var(--teal);
+      color: white;
+      box-shadow: 0 4px 12px rgba(204,32,16,0.3);
+    }
+
+    .btn-event-teal:hover {
+      box-shadow: 0 8px 20px rgba(204,32,16,0.4);
+    }
+
+    .btn-event-orange {
+      background: var(--orange);
+      color: white;
+      box-shadow: 0 4px 12px rgba(232,120,32,0.3);
+    }
+
+    .btn-event-orange:hover {
+      box-shadow: 0 8px 20px rgba(232,120,32,0.4);
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--navy);
+      color: rgba(255, 255, 255, 0.7);
+      padding: 40px 0 24px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 56px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 40px;
+    }
+
+    .footer-logo {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .footer-logo-en {
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .footer-logo-ja {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .footer-nav {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .footer-nav a {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .footer-nav a:hover {
+      color: white;
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-copy {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 12px;
+    }
+
+    .footer-social a {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-decoration: none;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+
+    .footer-social a:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media screen and (max-width: 768px) {
+      section:not(#hero) { padding: 80px 0; }
+
+      .section-title { font-size: 36px; margin-bottom: 48px; }
+
+      .interview-wrap { grid-template-columns: 1fr; gap: 40px; }
+
+      .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+
+      .medical-grid { grid-template-columns: 1fr; gap: 40px; }
+
+      .sns-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+
+      .events-grid { grid-template-columns: 1fr; }
+
+      .lakanto-layout { grid-template-columns: 1fr; gap: 50px; }
+
+      .lakanto-info-section { grid-template-columns: 1fr; gap: 32px; }
+
+      .lakanto-title-section { flex-direction: column; gap: 40px; }
+
+      .trial-inner { grid-template-columns: 1fr; gap: 50px; }
+
+      .section-2-title { font-size: 40px; }
+
+      .trial-title { font-size: 28px; }
+
+      .footer-top { gap: 32px; }
+
+      .footer-nav { gap: 24px; }
+
+      .banner-strip { padding: 20px 32px; font-size: 18px; }
+
+      #section-7 { padding: 60px 0; }
+      .recipe-item { flex: 0 0 260px; }
+    }
+
+    @media screen and (max-width: 480px) {
+      .container { padding: 0 16px; }
+
+      section:not(#hero) { padding: 60px 0; }
+
+      .section-title { font-size: 28px; margin-bottom: 40px; }
+
+      .cards-grid { grid-template-columns: 1fr; }
+
+      .sns-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+      .interview-wrap { gap: 20px; }
+
+      .banner-strip {
+        padding: 16px 24px;
+        margin: 60px 0;
+        clip-path: none;
+        border-radius: 12px;
+        font-size: 16px;
+      }
+
+      #section-7 { padding: 40px 0; }
+      .recipe-item { flex: 0 0 200px; }
+
+      footer { padding: 48px 0 24px; }
+
+      .footer-top { flex-direction: column; gap: 24px; padding-bottom: 24px; }
+
+      .footer-bottom { flex-direction: column; }
+
+      .lakanto-deco-side { display: none; }
+    }
+
+    /* ===== 印刷：画面（デスクトップ）表示のまま出力 ===== */
+    @media print {
+      /* 背景色・背景画像を印刷に反映 */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      html, body { overflow: visible !important; }
+
+      /* 固定要素を通常配置にして印刷崩れ・重なりを防ぐ */
+      header { position: static !important; }
+      #hero { position: relative !important; top: 0 !important; }
+      #section-1 { margin-top: 0 !important; }
+
+      /* 背景固定は印刷で出ないことがあるため解除 */
+      #section-6 { background-attachment: scroll !important; }
+
+      /* スクロール連動アニメの初期状態（非表示）を解除して全要素を表示 */
+      .animate-fade,
+      .animate-slide-left,
+      .animate-slide-right,
+      .animate-scale {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      /* ヒーロー帯を表示状態で固定 */
+      .hero-banner {
+        transform: translateY(calc(-100% + 16.67%)) rotateZ(-2.5deg) !important;
+      }
+      /* 用紙幅に収まるよう帯の文字を縮小（縦・横どちらでも1行で収まる） */
+      .hero-banner-text {
+        opacity: 1 !important;
+        font-size: clamp(16px, 3.2vw, 38px) !important;
+      }
+
+      /* ラカントとは（#section-5）以降を改ページ。
+         セクション間の装飾は手前で改ページして次ページ先頭に付ける。
+         （#section-4 はsection-2と同じページのまま） */
+      .gradient-dot-decoration-red,  /* section-5前・section-9前の赤ドット帯 */
+      .knife-fork-decoration,        /* section-7前の区切り */
+      #section-6,
+      #section-8 {
+        page-break-before: always; /* 旧仕様 */
+        break-before: page;        /* 新仕様 */
+      }
+
+      /* 用紙の向き（縦／横）は印刷ダイアログの設定に従う */
+      @page { margin: 10mm; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== PASSWORD GATE ===== -->
+<style>
+  #pw-gate {
+    position: fixed; inset: 0; z-index: 999999;
+    display: flex; align-items: center; justify-content: center;
+    background: #2E1010;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  #pw-gate.hidden { display: none; }
+  body.pw-locked { overflow: hidden; }
+  #pw-box {
+    background: #FFFDF8; padding: 40px 32px; border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    width: min(360px, 88vw); text-align: center;
+  }
+  #pw-box h1 { font-size: 20px; color: #6B1010; margin-bottom: 8px; }
+  #pw-box p { font-size: 13px; color: #7A7070; margin-bottom: 24px; }
+  #pw-input {
+    width: 100%; padding: 12px 14px; font-size: 16px;
+    border: 2px solid #E8D8D8; border-radius: 8px; outline: none;
+    transition: border-color .2s;
+  }
+  #pw-input:focus { border-color: #CC2010; }
+  #pw-btn {
+    width: 100%; margin-top: 14px; padding: 12px; font-size: 15px; font-weight: 700;
+    color: #fff; background: #CC2010; border: none; border-radius: 8px; cursor: pointer;
+    transition: opacity .2s;
+  }
+  #pw-btn:hover { opacity: .88; }
+  #pw-error { color: #CC2010; font-size: 13px; margin-top: 12px; min-height: 18px; }
+</style>
+<div id="pw-gate">
+  <div id="pw-box">
+    <h1>糖質疲労Lab</h1>
+    <p>閲覧にはパスワードが必要です</p>
+    <input id="pw-input" type="password" placeholder="パスワード" autocomplete="off" autofocus>
+    <button id="pw-btn" type="button">入る</button>
+    <div id="pw-error"></div>
+  </div>
+</div>
+<script>
+  (function () {
+    var PASSWORD = 'martinlab';
+    var KEY = 'tsl_pw_ok';
+    var gate = document.getElementById('pw-gate');
+    var input = document.getElementById('pw-input');
+    var btn = document.getElementById('pw-btn');
+    var err = document.getElementById('pw-error');
+
+    function unlock() {
+      gate.classList.add('hidden');
+      document.body.classList.remove('pw-locked');
+    }
+    function check() {
+      if (input.value === PASSWORD) {
+        try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+        unlock();
+      } else {
+        err.textContent = 'パスワードが違います';
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    document.body.classList.add('pw-locked');
+    var ok = false;
+    try { ok = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+    if (ok) { unlock(); }
+
+    btn.addEventListener('click', check);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') check();
+    });
+  })();
+</script>
+<!-- ===== /PASSWORD GATE ===== -->
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-en">糖質疲労Lab</span>
+    </div>
+    <a href="#section-8" class="btn-nav-purchase">ラカントを試す →</a>
+  </div>
+</header>
+
+<!-- HERO: VIDEO ONLY -->
+<section id="hero">
+  <div class="hero-video-placeholder">
+    <!-- TODO: 本番では動画に差し替え（一時的にコンセプト画像を表示） -->
+    <img src="sozai/background/糖質疲労コンセプトムービー画コンテ_0420.jpeg" alt="糖質疲労コンセプトムービー" style="width:100%; height:100%; object-fit:cover;">
+    <!--
+    <video width="100%" height="100%" autoplay muted loop playsinline style="object-fit: cover;">
+      <source src="sozai/スカイビル_モニター動画v4.mp4" type="video/mp4">
+    </video>
+    -->
+  </div>
+  <!-- 赤い帯とテキスト -->
+  <div class="hero-banner-container">
+    <div class="hero-banner">
+      <div class="hero-banner-text">ラカントで、午後のパフォーマンスを変えよう！</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 1: INTERVIEW -->
+<section id="section-1">
+  <div class="container">
+    <h2 class="section-title animate-fade">ランチ後の眠気やだるさ...<br>それは「<span class="marker">糖質疲労</span>」かも</h2>
+
+    <div class="interview-wrap">
+      <div class="interview-player animate-slide-left">
+        <div class="interview-thumbnail">
+          <p class="interview-title">「糖質疲労」とは何か。<br>山田悟先生が解説します。</p>
+          <div class="play-btn"></div>
+          <p class="interview-duration">約15分</p>
+        </div>
+      </div>
+
+      <div class="interview-doctor-card animate-slide-right">
+        <div class="interview-doctor-photo">
+          <img src="sozai/yamadasatoru.jpg" alt="山田悟先生">
+        </div>
+        <div>
+          <p class="doctor-title">北里研究所病院<br>糖尿病センター長</p>
+          <p class="doctor-name">山田 悟 先生</p>
+        </div>
+      </div>
+    </div>
+
+    <img src="sozai/graph/血糖値スパイクグラフ_OL.svg" alt="血糖値スパイクグラフ" class="section1-graph animate-fade">
+  </div>
+</section>
+
+<!-- SECTION 2: BLOOD SUGAR SPIKE GRAPH -->
+<section id="section-2">
+  <div class="container">
+    <div class="sugar-fatigue-group">
+
+    <h2 class="section-title animate-fade">これが「<span class="marker">糖質疲労</span><span class="punct-tight">」！</span></h2>
+
+    <div class="cards-grid">
+      <div class="card animate-fade">
+        <img src="sozai/糖質疲労/1.png" alt="食後の血糖値スパイク" class="card-image">
+        <h3 class="card-title"><span class="card-num">1</span><span class="card-text">食後の血糖値スパイク！</span></h3>
+      </div>
+      <div class="card animate-fade">
+        <img src="sozai/糖質疲労/2.png" alt="そして急降下" class="card-image">
+        <h3 class="card-title"><span class="card-num">2</span><span class="card-text">そして…急降下！</span></h3>
+      </div>
+      <div class="card animate-fade">
+        <img src="sozai/糖質疲労/3.png" alt="食後の眠気と疲労感" class="card-image">
+        <h3 class="card-title"><span class="card-num">3</span><span class="card-text">食後の眠気と疲労感</span></h3>
+      </div>
+      <div class="card animate-fade">
+        <img src="sozai/糖質疲労/4.png" alt="老化・病気のリスク増" class="card-image">
+        <h3 class="card-title"><span class="card-num">4</span><span class="card-text">老化・病気のリスク増</span></h3>
+      </div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4: CHECK BANNER -->
+<section id="section-4">
+  <div class="banner-container">
+    <a href="https://example.com/check" class="banner-strip">
+      <span class="banner-text-small">あなたは大丈夫？</span><br>
+      <span class="banner-text-large">1分で分かる糖質疲労チェック！</span>
+    </a>
+    <div class="banner-click-cursor"></div>
+  </div>
+</section>
+
+<div class="gradient-dot-decoration-red">
+  <div class="dot-group">
+    <div class="dot-red small"></div>
+    <div class="dot-red"></div>
+    <div class="dot-red large"></div>
+  </div>
+  <div class="dot-group">
+    <div class="dot-red large"></div>
+    <div class="dot-red"></div>
+    <div class="dot-red small"></div>
+  </div>
+  <div class="dot-group">
+    <div class="dot-red"></div>
+    <div class="dot-red large"></div>
+    <div class="dot-red"></div>
+  </div>
+  <div class="dot-group">
+    <div class="dot-red small"></div>
+    <div class="dot-red"></div>
+    <div class="dot-red large"></div>
+  </div>
+</div>
+
+<!-- SECTION 5: WHAT IS LAKANTO -->
+<section id="section-5">
+  <!-- Hero visual background -->
+  <div class="lakanto-visual">
+    <div class="lakanto-visual-img">
+      <img src="sozai/lucanka.png" alt="羅漢果">
+    </div>
+  </div>
+
+  <!-- Title overlay -->
+  <div class="lakanto-title-section animate-fade">
+    <div class="lakanto-title-content">
+      <p class="section-label section-label--center">ラカントとは？</p>
+      <h2 class="section-title text-center">
+        羅漢果から生まれた、<br>カロリーゼロの自然な甘味料
+      </h2>
+      <p class="section-sub text-center">
+        砂糖と同じ甘さなのに、カロリーゼロ・ロカボ糖質ゼロ。<br>
+        1995年の発売以来、世界24カ国で愛されてきた実績があります。
+      </p>
+    </div>
+  </div>
+
+  <!-- Content area -->
+  <div class="container">
+    <div class="lakanto-layout">
+      <!-- Info section -->
+      <div class="lakanto-info-section animate-fade">
+        <div class="lakanto-info-text">
+          <h3 class="lakanto-info-title">中国・桂林地方原産<br>「羅漢果（ラカンカ）」</h3>
+          <p class="lakanto-info-body">
+            中国桂林地方の山岳地帯にのみ育つウリ科の植物「羅漢果」。<br>
+            中国政府が保護する貴重な植物で、生の状態での輸出は禁止されています。<br>
+            サラヤは独自の特許技術でその高純度エキスの製造を確立しました。
+          </p>
+        </div>
+        <ul class="lakanto-features">
+          <li class="lakanto-feature">
+            <div class="lakanto-feature-check">✓</div>
+            <p class="lakanto-feature-title">砂糖と同量でそのまま使える</p>
+            <p class="lakanto-feature-desc">換算不要。料理・飲み物・お菓子すべてOK</p>
+          </li>
+          <li class="lakanto-feature">
+            <div class="lakanto-feature-check">✓</div>
+            <p class="lakanto-feature-title">加熱しても甘さが変わらない</p>
+            <p class="lakanto-feature-desc">焼き菓子・煮込み料理・炒め物にも対応</p>
+          </li>
+          <li class="lakanto-feature">
+            <div class="lakanto-feature-check">✓</div>
+            <p class="lakanto-feature-title">きび糖に似た自然なまろやかさ</p>
+            <p class="lakanto-feature-desc">だし汁との相乗効果で和食の旨みも引き立てます</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 6: INFLUENCERS -->
+<section id="section-6">
+  <div class="container">
+    <div class="ribbon-heading animate-fade">
+      <div class="ribbon">
+        <h2 class="section-title">ラカントでおいしく健康的に！</h2>
+      </div>
+    </div>
+
+    <div class="sns-grid">
+      <div class="sns-card animate-fade">
+        <div class="sns-video">
+          <div class="sns-emoji">🏃</div>
+          <div class="sns-play"></div>
+        </div>
+        <div class="sns-meta">
+          <p class="sns-role">アスリート</p>
+          <p class="sns-name">インフルエンサー1</p>
+          <p class="sns-hash">#糖質コントロール #ラカント</p>
+        </div>
+      </div>
+
+      <div class="sns-card animate-fade">
+        <div class="sns-video sns-video--warm">
+          <div class="sns-emoji">👩‍🍳</div>
+          <div class="sns-play"></div>
+        </div>
+        <div class="sns-meta">
+          <p class="sns-role">料理研究家</p>
+          <p class="sns-name">インフルエンサー2</p>
+          <p class="sns-hash">#ラカントレシピ #砂糖を替えた</p>
+        </div>
+      </div>
+
+      <div class="sns-card animate-fade">
+        <div class="sns-video sns-video--green">
+          <div class="sns-emoji">🥗</div>
+          <div class="sns-play"></div>
+        </div>
+        <div class="sns-meta">
+          <p class="sns-role">管理栄養士</p>
+          <p class="sns-name">インフルエンサー3</p>
+          <p class="sns-hash">#エイジングケア #糖質疲労</p>
+        </div>
+      </div>
+
+      <div class="sns-card animate-fade">
+        <div class="sns-video sns-video--purple">
+          <div class="sns-emoji">💼</div>
+          <div class="sns-play"></div>
+        </div>
+        <div class="sns-meta">
+          <p class="sns-role">ビジネスパーソン</p>
+          <p class="sns-name">インフルエンサー4</p>
+          <p class="sns-hash">#午後もすっきり #ラカント</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="knife-fork-decoration">
+  <div class="knife-fork-emblem">
+    <img src="sozai/knife_fork.svg" alt="ナイフとフォーク">
+  </div>
+</div>
+
+<!-- SECTION 7: RECIPE GALLERY -->
+<section id="section-7">
+  <div class="recipe-gallery">
+    <!-- Upper row - scrolls right (1-17) -->
+    <div class="recipe-row recipe-row--top">
+      <div class="recipe-item" data-number="1"><img src="sozai/レシピ/01.png" alt="1"></div>
+      <div class="recipe-item" data-number="2"><img src="sozai/レシピ/02.png" alt="2"></div>
+      <div class="recipe-item" data-number="3"><img src="sozai/レシピ/03.png" alt="3"></div>
+      <div class="recipe-item" data-number="4"><img src="sozai/レシピ/04.png" alt="4"></div>
+      <div class="recipe-item" data-number="5"><img src="sozai/レシピ/05.png" alt="5"></div>
+      <div class="recipe-item" data-number="6"><img src="sozai/レシピ/06.png" alt="6"></div>
+      <div class="recipe-item" data-number="7"><img src="sozai/レシピ/07.png" alt="7"></div>
+      <div class="recipe-item" data-number="8"><img src="sozai/レシピ/08.png" alt="8"></div>
+      <div class="recipe-item" data-number="9"><img src="sozai/レシピ/09.png" alt="9"></div>
+      <div class="recipe-item" data-number="10"><img src="sozai/レシピ/10.png" alt="10"></div>
+      <div class="recipe-item" data-number="11"><img src="sozai/レシピ/11.png" alt="11"></div>
+      <div class="recipe-item" data-number="12"><img src="sozai/レシピ/12.png" alt="12"></div>
+      <div class="recipe-item" data-number="13"><img src="sozai/レシピ/13.png" alt="13"></div>
+      <div class="recipe-item" data-number="14"><img src="sozai/レシピ/14.png" alt="14"></div>
+      <div class="recipe-item" data-number="15"><img src="sozai/レシピ/15.png" alt="15"></div>
+      <div class="recipe-item" data-number="16"><img src="sozai/レシピ/16.png" alt="16"></div>
+      <div class="recipe-item" data-number="17"><img src="sozai/レシピ/17.png" alt="17"></div>
+      <!-- Duplicate for seamless loop -->
+      <div class="recipe-item" data-number="1"><img src="sozai/レシピ/01.png" alt="1"></div>
+      <div class="recipe-item" data-number="2"><img src="sozai/レシピ/02.png" alt="2"></div>
+      <div class="recipe-item" data-number="3"><img src="sozai/レシピ/03.png" alt="3"></div>
+      <div class="recipe-item" data-number="4"><img src="sozai/レシピ/04.png" alt="4"></div>
+      <div class="recipe-item" data-number="5"><img src="sozai/レシピ/05.png" alt="5"></div>
+      <div class="recipe-item" data-number="6"><img src="sozai/レシピ/06.png" alt="6"></div>
+      <div class="recipe-item" data-number="7"><img src="sozai/レシピ/07.png" alt="7"></div>
+      <div class="recipe-item" data-number="8"><img src="sozai/レシピ/08.png" alt="8"></div>
+      <div class="recipe-item" data-number="9"><img src="sozai/レシピ/09.png" alt="9"></div>
+      <div class="recipe-item" data-number="10"><img src="sozai/レシピ/10.png" alt="10"></div>
+      <div class="recipe-item" data-number="11"><img src="sozai/レシピ/11.png" alt="11"></div>
+      <div class="recipe-item" data-number="12"><img src="sozai/レシピ/12.png" alt="12"></div>
+      <div class="recipe-item" data-number="13"><img src="sozai/レシピ/13.png" alt="13"></div>
+      <div class="recipe-item" data-number="14"><img src="sozai/レシピ/14.png" alt="14"></div>
+      <div class="recipe-item" data-number="15"><img src="sozai/レシピ/15.png" alt="15"></div>
+      <div class="recipe-item" data-number="16"><img src="sozai/レシピ/16.png" alt="16"></div>
+      <div class="recipe-item" data-number="17"><img src="sozai/レシピ/17.png" alt="17"></div>
+    </div>
+
+    <div class="recipe-link-wrapper">
+      <a href="https://www.lakanto.jp/recipe/" target="_blank" rel="noopener noreferrer" class="recipe-link-btn">おススメ！ラカントレシピ集！</a>
+    </div>
+
+    <!-- Lower row - scrolls left (18-34) -->
+    <div class="recipe-row recipe-row--bottom">
+      <div class="recipe-item" data-number="18"><img src="sozai/レシピ/18.png" alt="18"></div>
+      <div class="recipe-item" data-number="19"><img src="sozai/レシピ/19.png" alt="19"></div>
+      <div class="recipe-item" data-number="20"><img src="sozai/レシピ/20.png" alt="20"></div>
+      <div class="recipe-item" data-number="21"><img src="sozai/レシピ/21.png" alt="21"></div>
+      <div class="recipe-item" data-number="22"><img src="sozai/レシピ/22.png" alt="22"></div>
+      <div class="recipe-item" data-number="23"><img src="sozai/レシピ/23.png" alt="23"></div>
+      <div class="recipe-item" data-number="24"><img src="sozai/レシピ/24.png" alt="24"></div>
+      <div class="recipe-item" data-number="25"><img src="sozai/レシピ/25.png" alt="25"></div>
+      <div class="recipe-item" data-number="26"><img src="sozai/レシピ/26.png" alt="26"></div>
+      <div class="recipe-item" data-number="27"><img src="sozai/レシピ/27.png" alt="27"></div>
+      <div class="recipe-item" data-number="28"><img src="sozai/レシピ/28.png" alt="28"></div>
+      <div class="recipe-item" data-number="29"><img src="sozai/レシピ/29.png" alt="29"></div>
+      <div class="recipe-item" data-number="30"><img src="sozai/レシピ/30.png" alt="30"></div>
+      <div class="recipe-item" data-number="31"><img src="sozai/レシピ/31.png" alt="31"></div>
+      <div class="recipe-item" data-number="32"><img src="sozai/レシピ/32.png" alt="32"></div>
+      <div class="recipe-item" data-number="33"><img src="sozai/レシピ/33.png" alt="33"></div>
+      <div class="recipe-item" data-number="34"><img src="sozai/レシピ/34.png" alt="34"></div>
+      <!-- Duplicate for seamless loop -->
+      <div class="recipe-item" data-number="18"><img src="sozai/レシピ/18.png" alt="18"></div>
+      <div class="recipe-item" data-number="19"><img src="sozai/レシピ/19.png" alt="19"></div>
+      <div class="recipe-item" data-number="20"><img src="sozai/レシピ/20.png" alt="20"></div>
+      <div class="recipe-item" data-number="21"><img src="sozai/レシピ/21.png" alt="21"></div>
+      <div class="recipe-item" data-number="22"><img src="sozai/レシピ/22.png" alt="22"></div>
+      <div class="recipe-item" data-number="23"><img src="sozai/レシピ/23.png" alt="23"></div>
+      <div class="recipe-item" data-number="24"><img src="sozai/レシピ/24.png" alt="24"></div>
+      <div class="recipe-item" data-number="25"><img src="sozai/レシピ/25.png" alt="25"></div>
+      <div class="recipe-item" data-number="26"><img src="sozai/レシピ/26.png" alt="26"></div>
+      <div class="recipe-item" data-number="27"><img src="sozai/レシピ/27.png" alt="27"></div>
+      <div class="recipe-item" data-number="28"><img src="sozai/レシピ/28.png" alt="28"></div>
+      <div class="recipe-item" data-number="29"><img src="sozai/レシピ/29.png" alt="29"></div>
+      <div class="recipe-item" data-number="30"><img src="sozai/レシピ/30.png" alt="30"></div>
+      <div class="recipe-item" data-number="31"><img src="sozai/レシピ/31.png" alt="31"></div>
+      <div class="recipe-item" data-number="32"><img src="sozai/レシピ/32.png" alt="32"></div>
+      <div class="recipe-item" data-number="33"><img src="sozai/レシピ/33.png" alt="33"></div>
+      <div class="recipe-item" data-number="34"><img src="sozai/レシピ/34.png" alt="34"></div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 8: PURCHASE -->
+<section id="section-8">
+  <div class="container">
+    <!-- Section header -->
+    <p class="section-label section-label--trial animate-fade">まずは試してみてください</p>
+    <h2 class="section-8-main-title animate-fade">
+      砂糖をラカントに。<br>
+      <span>それだけで、毎食の糖質摂取を抑えやすくなります。</span>
+    </h2>
+
+    <!-- Proof numbers bar -->
+    <div class="proof-numbers animate-fade">
+      <div class="proof-num-item">
+        <span class="proof-num">40<small>年</small></span>
+        <span class="proof-label">ブランド実績</span>
+      </div>
+      <div class="proof-num-divider"></div>
+      <div class="proof-num-item">
+        <span class="proof-num">0<small>kcal</small></span>
+        <span class="proof-label">カロリー</span>
+      </div>
+      <div class="proof-num-divider"></div>
+      <div class="proof-num-item">
+        <span class="proof-num">24<small>カ国</small></span>
+        <span class="proof-label">世界で愛用</span>
+      </div>
+      <div class="proof-num-divider"></div>
+      <div class="proof-num-item">
+        <span class="proof-num">5.4<small>円/日</small></span>
+        <span class="proof-label">1日あたりのコスト</span>
+      </div>
+    </div>
+
+    <!-- Main product showcase -->
+    <div class="trial-inner">
+      <div class="trial-product animate-scale">
+        <div class="trial-product-img"><img src="sozai/lucantpacage.png" alt="ラカント顆粒"></div>
+        <p class="trial-product-name">ラカントS 顆粒</p>
+        <div class="trial-price-wrap">
+          <div class="trial-price">¥583<span>（税込）</span></div>
+          <p class="trial-price-sub">130g入り</p>
+        </div>
+      </div>
+
+      <div class="trial-content">
+        <ul class="trial-points">
+          <li class="trial-point animate-slide-right">
+            <span class="trial-point-icon">✓</span>
+            <span>砂糖と同じ甘さで使いやすい</span>
+          </li>
+          <li class="trial-point animate-slide-right">
+            <span class="trial-point-icon">✓</span>
+            <span>安心のAskDoctorsマーク付き</span>
+          </li>
+          <li class="trial-point animate-slide-right">
+            <span class="trial-point-icon">✓</span>
+            <span>甘いものを食べたいが、摂取カロリーを抑えたい。</span>
+          </li>
+          <li class="trial-point animate-slide-right">
+            <span class="trial-point-icon">✓</span>
+            <span>健康のため毎食の糖質をコントロールしたい。</span>
+          </li>
+          <li class="trial-point animate-slide-right">
+            <span class="trial-point-icon">✓</span>
+            <span>甘味料は、植物由来にこだわりたい。</span>
+          </li>
+        </ul>
+        <div class="trial-ctas">
+          <a href="https://shop.saraya.com/shop/g/g28318-01-01-01-000/" target="_blank" rel="noopener noreferrer" class="btn-purchase-lg">🛒 ラカントを購入する（公式）</a>
+          <a href="#" class="btn-outline-white-sm">Amazonで購入する</a>
+        </div>
+        <p class="trial-note">※ 本品は医薬品ではありません。効果には個人差があります。</p>
+      </div>
+    </div>
+
+    <!-- Product lineup grid -->
+    <div class="product-lineup-section animate-fade">
+      <p class="product-lineup-label">ラカント 製品ラインナップ</p>
+      <div class="product-lineup-grid">
+        <div class="product-lineup-card featured">
+          <span class="lineup-badge">人気No.1</span>
+          <div class="lineup-img"><img src="sozai/lucantpacage.png" alt="ラカントS 顆粒"></div>
+          <p class="lineup-name">ラカントS 顆粒</p>
+          <a href="#" class="lineup-cta">購入する</a>
+        </div>
+        <div class="product-lineup-card">
+          <div class="lineup-img"><img src="sozai/lucantF.png" alt="ラカント フローラビオ"></div>
+          <p class="lineup-name">ラカント フローラビオ</p>
+          <a href="#" class="lineup-cta">詳しく見る</a>
+        </div>
+        <div class="product-lineup-card">
+          <div class="lineup-img"><img src="sozai/lucantSS.png" alt="ラカントS シロップ"></div>
+          <p class="lineup-name">ラカントS シロップ</p>
+          <a href="#" class="lineup-cta">詳しく見る</a>
+        </div>
+        <div class="product-lineup-card">
+          <div class="lineup-img"><img src="sozai/lucantA.png" alt="ラカント アルロースブレンド"></div>
+          <p class="lineup-name">ラカント アルロースブレンド</p>
+          <a href="#" class="lineup-cta">詳しく見る</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="gradient-dot-decoration-red">
+  <div class="dot-group">
+    <div class="dot-red small"></div>
+    <div class="dot-red"></div>
+    <div class="dot-red large"></div>
+  </div>
+  <div class="dot-group">
+    <div class="dot-red large"></div>
+    <div class="dot-red"></div>
+    <div class="dot-red small"></div>
+  </div>
+  <div class="dot-group">
+    <div class="dot-red"></div>
+    <div class="dot-red large"></div>
+    <div class="dot-red"></div>
+  </div>
+  <div class="dot-group">
+    <div class="dot-red small"></div>
+    <div class="dot-red"></div>
+    <div class="dot-red large"></div>
+  </div>
+</div>
+
+<!-- SECTION 9: EVENTS & SEMINARS -->
+<section id="section-9">
+  <div class="container">
+    <h2 class="section-title text-center animate-fade">ラカントで午後のパフォーマンスを変えよう！<br><span style="display: block; margin-top: 12px; font-size: 0.6em; letter-spacing: 0.1em; font-weight: 600; color: var(--accent);">～イベント・セミナー情報～</span></h2>
+
+    <div class="events-grid">
+      <div class="event-card animate-slide-left">
+        <span class="event-badge badge-popup">セミナー</span>
+        <h3 class="event-title">午後の生産性向上へ！<br>糖質疲労改善セミナー</h3>
+        <ul class="event-info">
+          <li>
+            <span class="event-info-icon">📅</span>
+            <span>2026年8月10日</span>
+          </li>
+          <li>
+            <span class="event-info-icon">📍</span>
+            <span>名古屋市内</span>
+          </li>
+          <li>
+            <span class="event-info-icon">⏰</span>
+            <span>15:00-16:30</span>
+          </li>
+        </ul>
+        <p class="event-desc">従業員の健康状態は企業の生産性に直結します。糖質疲労による午後の眠気・疲労が与えるビジネスインパクトと、健康経営の観点から実践できる食事管理について。</p>
+        <a href="https://example.com/event1" class="btn-event btn-event-teal">詳細を見る →</a>
+      </div>
+
+      <div class="event-card animate-slide-right">
+        <span class="event-badge badge-popup">POPUP</span>
+        <h3 class="event-title">食べて実感！<br>ラカント体験カフェ</h3>
+        <ul class="event-info">
+          <li>
+            <span class="event-info-icon">📅</span>
+            <span>2026年7月15日-8月31日</span>
+          </li>
+          <li>
+            <span class="event-info-icon">📍</span>
+            <span>全国主要都市</span>
+          </li>
+          <li>
+            <span class="event-info-icon">⏰</span>
+            <span>10:00-19:00</span>
+          </li>
+        </ul>
+        <p class="event-desc">ラカントを使用した特別メニューを堪能できるポップアップカフェ。カフェラテやスイーツなど、砂糖をラカントに替えた健康的でおいしい食体験をお楽しみください。</p>
+        <a href="https://example.com/event2" class="btn-event btn-event-orange">詳細を見る →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // アニメーション トリガー
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('.animate-fade, .animate-slide-left, .animate-slide-right, .animate-scale').forEach(el => {
+    observer.observe(el);
+  });
+
+  // ヘッダー高さに応じてヒーロー位置を調整
+  function updateHeroPosition() {
+    const header = document.querySelector('header');
+    const hero = document.getElementById('hero');
+    const section1 = document.getElementById('section-1');
+
+    const headerHeight = header.offsetHeight;
+    const heroHeight = hero.offsetHeight;
+
+    hero.style.top = headerHeight + 'px';
+    section1.style.marginTop = (headerHeight + heroHeight) + 'px';
+  }
+
+  // ページロード時と画面サイズ変更時に実行
+  updateHeroPosition();
+  window.addEventListener('resize', updateHeroPosition);
+
+  // ヒーロー帯アニメーション（ページロード3秒後に発動）
+  gsap.delayedCall(3, () => {
+    // 赤い帯が下から上へスライド
+    gsap.to('.hero-banner', {
+      duration: 0.8,
+      ease: 'power2.out',
+      transform: 'translateY(calc(-100% + 16.67%)) rotateZ(-2.5deg)'
+    });
+
+    // テキスト出現
+    gsap.to('.hero-banner-text', {
+      delay: 0.4,
+      opacity: 1,
+      duration: 0.3,
+      ease: 'power2.out'
+    });
+
+    // テキスト点滅開始
+    document.querySelector('.hero-banner-text').classList.add('active');
+  });
+
+</script>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-logo">
+        <span class="footer-logo-en">糖質疲労Lab</span>
+      </div>
+      <nav class="footer-nav">
+        <a href="#hero">トップ</a>
+        <a href="#section-1">山田悟先生のインタビュー動画</a>
+        <a href="#section-4">糖質疲労チェック</a>
+        <a href="#section-5">ラカントとは</a>
+        <a href="#section-6">ショート動画</a>
+        <a href="#section-7">レシピ</a>
+        <a href="#section-8">購入・お試し</a>
+        <a href="#section-9">イベント</a>
+      </nav>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2026 SARAYA Co., Ltd. All Rights Reserved.</p>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/lakanto_official/" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+            <path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.43.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.43.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.43-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.43-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.31-1.46.72-2.12 1.38C1.35 2.68.94 3.35.63 4.14.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.79.72 1.46 1.38 2.12.66.66 1.33 1.07 2.12 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.79-.31 1.46-.72 2.12-1.38.66-.66 1.07-1.33 1.38-2.12.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91-.31-.79-.72-1.46-1.38-2.12-.66-.66-1.33-1.07-2.12-1.38-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0z"/>
+            <path d="M12 5.84A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84zm0 10.16A4 4 0 1 1 16 12a4 4 0 0 1-4 4z"/>
+            <circle cx="18.41" cy="5.59" r="1.44"/>
+          </svg>
+        </a>
+        <a href="https://www.tiktok.com/@lakanto_official" target="_blank" rel="noopener noreferrer" title="TikTok" aria-label="TikTok">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true">
+            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.94 2.94 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43V8.69a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.12z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+# デフォルトで全部除外し、公開したいものだけ下で明示的に許可する
+/*
+
+# 公開するもの
+!.gitignore
+!.nojekyll
+!mockup_ver5.html
+!sozai
