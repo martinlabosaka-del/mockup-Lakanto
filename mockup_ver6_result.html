@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 先方確認用のモックアップ。検索結果に載らないようにする -->
+  <meta name="robots" content="noindex, nofollow">
+  <title>チェック結果｜糖質疲労LAB</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- 日本語の改行位置を文節単位にする（Google製 BudouX） -->
+  <script src="https://unpkg.com/budoux@0.8.4/bundle/budoux-ja.min.js" defer></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent:     #CC2010;
+      --navy:       #6B1010;
+      --orange:     #E87820;
+      --green:      #6BA600;
+      --yellow:     #FFD21A;
+      --cream:      #FDF6EC;
+      --offwhite:   #F8F2F2;
+      --gray:       #7A7070;
+      --gray-light: #E8D8D8;
+      --line:       #DDC9B8;   /* カードの罫線（下地に合わせた暖色のヘアライン） */
+      --white:      #FFFDF8;
+      --ink:        #2E1010;
+      --lv:         #CC2010; /* 判定レベル色（JSで上書き） */
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      color: var(--ink);
+      background: var(--cream);
+      font-size: 16px;
+      line-height: 1.8;
+      word-break: auto-phrase;
+      overflow-x: hidden;
+    }
+
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+    .container--narrow { max-width: 760px; }
+
+    /* 日本語の改行コントロール（BudouX + text-wrap） */
+    /* BudouXが入れた位置「だけ」で改行させる */
+    .jp-break { word-break: keep-all; overflow-wrap: break-word; }
+    h1, h2, h3, .result-name, .section-title, .lakanto-intro-title, .link-card-title { text-wrap: balance; }
+    p, li { text-wrap: pretty; }
+
+    /* BudouXが語の途中で切ってしまう語だけ、明示的に改行禁止にする */
+    .nb { white-space: nowrap; }
+
+    /* ===== HEADER ===== */
+    header {
+      background: var(--cream);
+      border-bottom: 3px solid var(--accent);
+      padding: 10px 0;
+    }
+
+    .header-inner {
+      max-width: 1100px; margin: 0 auto; padding: 0 24px;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    }
+
+    .logo-en { font-size: 20px; font-weight: 900; color: var(--accent); text-decoration: none; }
+    .btn-back-top { font-size: 13px; color: var(--gray); text-decoration: none; }
+    .btn-back-top:hover { color: var(--accent); }
+
+    /* ===== RESULT ===== */
+    #result { padding: 48px 0 56px; background: var(--white); }
+
+    .result-lead {
+      text-align: center;
+      font-size: clamp(18px, 2.6vw, 26px);
+      font-weight: 700;
+      color: var(--gray);
+      margin-bottom: 28px;
+    }
+
+    .result-lead strong { color: var(--ink); font-weight: 900; }
+
+    .result-card {
+      background: var(--cream);
+      border: 2px solid var(--lv);
+      border-radius: 12px;
+      padding: 40px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: -120px; left: 50%;
+      width: 420px; height: 420px;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, color-mix(in srgb, var(--lv) 18%, transparent) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .gauge-wrap { position: relative; width: 240px; margin: 0 auto 8px; }
+    .gauge { display: block; width: 100%; height: auto; transform: rotate(-90deg); }
+    .gauge-track { fill: none; stroke: var(--gray-light); stroke-width: 14; }
+    .gauge-fill {
+      fill: none;
+      stroke: var(--lv);
+      stroke-width: 14;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1.4s cubic-bezier(.2,.7,.3,1);
+    }
+
+    .gauge-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gauge-score {
+      font-family: 'Inter', sans-serif;
+      font-size: 62px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--lv);
+      /* カウントアップ中に数字の幅が揺れないよう等幅数字にする */
+      font-variant-numeric: tabular-nums;
+    }
+    .gauge-score small { font-size: 0.35em; font-weight: 700; color: var(--gray); }
+    .gauge-caption { font-size: 12px; font-weight: 700; color: var(--gray); letter-spacing: 0.1em; margin-top: 4px; }
+
+    .result-badge {
+      display: inline-block;
+      background: var(--lv);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      padding: 6px 20px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .result-name {
+      font-size: clamp(28px, 5vw, 46px);
+      font-weight: 900;
+      line-height: 1.3;
+      color: var(--lv);
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .result-desc {
+      font-size: clamp(15px, 1.6vw, 17px);
+      line-height: 2;
+      color: #4a2020;
+      max-width: 620px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .result-scale {
+      display: flex;
+      gap: 8px;
+      max-width: 560px;
+      margin: 28px auto 0;
+      position: relative;
+    }
+
+    .scale-step {
+      flex: 1;
+      border-radius: 8px;
+      padding: 10px 6px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--white);
+      border: 1px solid var(--line);
+      color: var(--gray);
+      line-height: 1.4;
+    }
+
+    .scale-step.on { color: #fff; border-color: transparent; }
+    .scale-step.on[data-lv="1"] { background: var(--green); }
+    .scale-step.on[data-lv="2"] { background: var(--orange); }
+    .scale-step.on[data-lv="3"] { background: var(--accent); }
+
+    .result-retry { text-align: center; margin-top: 20px; }
+    .result-retry a { font-size: 13px; color: var(--gray); text-decoration: underline; }
+    .result-retry a:hover { color: var(--accent); }
+
+    .result-note { font-size: 12px; color: var(--gray); text-align: center; margin-top: 16px; line-height: 1.8; }
+
+    /* ===== 矢印つなぎ ===== */
+    .flow-arrow {
+      background: var(--white);
+      text-align: center;
+      padding: 0 0 8px;
+    }
+    .flow-arrow span {
+      display: inline-block;
+      width: 0; height: 0;
+      border-left: 32px solid transparent;
+      border-right: 32px solid transparent;
+      border-top: 28px solid var(--gray-light);
+    }
+
+    /* ===== 対策セクション ===== */
+    #action {
+      background: linear-gradient(180deg, var(--white) 0%, var(--cream) 100%);
+      padding: 56px 0 64px;
+    }
+
+    .section-label {
+      font-size: 12px; font-weight: 700; color: var(--accent);
+      letter-spacing: 0.16em; text-transform: uppercase;
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      margin-bottom: 14px;
+    }
+    .section-label::before, .section-label::after {
+      content: ''; flex: 0 0 36px; height: 2px; background: var(--accent); border-radius: 999px; opacity: .6;
+    }
+
+    .section-title {
+      font-size: clamp(26px, 4.2vw, 42px);
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.35;
+      margin-bottom: 20px;
+    }
+
+    .section-title .marker {
+      color: var(--accent);
+      background: linear-gradient(transparent 58%, #ffe14d 58%, #ffd21a 100%);
+      padding: 0 0.1em;
+    }
+
+    .action-lead {
+      font-size: clamp(15px, 1.6vw, 17px);
+      line-height: 2;
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto 40px;
+      color: #4a2020;
+    }
+    .action-lead strong { color: var(--accent); font-weight: 700; }
+
+    /* ラカント紹介 */
+    .lakanto-intro {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 40px;
+      align-items: center;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 36px;
+      margin-bottom: 48px;
+    }
+
+    .lakanto-intro-img {
+      background: var(--offwhite);
+      border-radius: 8px;
+      padding: 18px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .lakanto-intro-img img { width: 100%; height: auto; object-fit: contain; }
+
+    .lakanto-intro-title {
+      font-size: clamp(20px, 2.6vw, 28px);
+      font-weight: 900;
+      line-height: 1.5;
+      margin-bottom: 12px;
+      color: var(--navy);
+    }
+    .lakanto-intro-body { font-size: 15px; line-height: 1.95; color: #4a2020; margin-bottom: 18px; }
+
+    .lakanto-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+    .lakanto-badge {
+      background: rgba(107,166,0,0.1);
+      color: #4d7a00;
+      border: 1px solid rgba(107,166,0,0.3);
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* 等幅3列をやめ、レシピを主役に。残り2つを従として下に並べる */
+    .link-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+
+    .link-card {
+      display: flex;
+      flex-direction: column;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .link-card:hover {
+      border-color: var(--accent);
+    }
+
+    /* 主役カード：横幅いっぱい、画像を左に置いた横組み */
+    .link-card--lead {
+      grid-column: 1 / -1;
+      flex-direction: row;
+      border: 2px solid var(--accent);
+    }
+
+    .link-card--lead .link-card-visual {
+      flex: 0 0 46%;
+      aspect-ratio: auto;
+    }
+
+    .link-card--lead .link-card-body {
+      padding: 30px 34px 32px;
+      justify-content: center;
+    }
+
+    .link-card--lead .link-card-title { font-size: clamp(22px, 2.6vw, 30px); }
+    .link-card--lead .link-card-desc { font-size: 15.5px; max-width: 34em; }
+    .link-card--lead .link-card-cta { align-self: flex-start; padding: 14px 34px; font-size: 15px; }
+
+    .link-card-visual {
+      aspect-ratio: 16/10;
+      overflow: hidden;
+      position: relative;
+      background: var(--offwhite);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .link-card-visual img { width: 100%; height: 100%; object-fit: cover; }
+    .link-card-visual.contain img { object-fit: contain; padding: 14px; }
+
+    .link-card-visual.mail {
+      background: linear-gradient(135deg, #8c0c12 0%, #CC2010 60%, #E87820 100%);
+      color: #fff;
+    }
+    .link-card-visual.mail svg { width: 76px; height: 76px; display: block; }
+
+    .link-card-body { padding: 22px 22px 26px; flex: 1; display: flex; flex-direction: column; }
+
+    .link-card-tag {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .link-card-title { font-size: 20px; font-weight: 900; line-height: 1.45; margin-bottom: 8px; color: var(--navy); }
+    .link-card-desc { font-size: 14px; color: var(--gray); line-height: 1.75; flex: 1; margin-bottom: 16px; }
+
+    .link-card-cta {
+      align-self: stretch;
+      text-align: center;
+      background: linear-gradient(180deg, #E8452F 0%, var(--accent) 55%, #A81010 100%);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+      padding: 12px 22px;
+      border-radius: 999px;
+      box-shadow: 0 5px 0 #7d0d08, 0 10px 20px rgba(204,32,16,0.25);
+      transition: transform 0.2s;
+    }
+
+    .link-card:hover .link-card-cta { transform: translateY(2px); box-shadow: 0 3px 0 #7d0d08, 0 6px 14px rgba(204,32,16,0.25); }
+
+    /* レシピ帯 */
+    .recipe-strip {
+      background: var(--green);
+      padding: 18px 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .recipe-row {
+      display: flex;
+      gap: 16px;
+      width: max-content;
+      animation: slideLeft 90s linear infinite;
+    }
+
+    /* WCAG 2.2.2：5秒以上動き続けるものには停止手段が要る。
+       ホバー/フォーカスに加えて、押せる停止ボタンも用意する */
+    .recipe-strip:hover .recipe-row,
+    .recipe-strip:focus-within .recipe-row { animation-play-state: paused; }
+    .recipe-row.is-paused { animation-play-state: paused !important; }
+
+    .recipe-pause {
+      position: absolute;
+      right: 14px; bottom: 14px;
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.85);
+      background: rgba(0,0,0,.35);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .recipe-pause:hover { background: rgba(0,0,0,.6); }
+    .recipe-pause svg { width: 15px; height: 15px; display: block; }
+
+    @keyframes slideLeft {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .recipe-item {
+      flex: 0 0 220px;
+      aspect-ratio: 1200/800;
+      overflow: hidden;
+      border-radius: 6px;
+    }
+    .recipe-item img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--navy);
+      color: rgba(255,255,255,0.7);
+      padding: 36px 0 24px;
+    }
+
+    .footer-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    .footer-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      flex-wrap: wrap; gap: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 20px;
+    }
+
+    .footer-logo-en { font-size: 18px; font-weight: 900; color: #fff; }
+    .footer-nav { display: flex; gap: 28px; flex-wrap: wrap; }
+    .footer-nav a { font-size: 13px; color: rgba(255,255,255,0.6); text-decoration: none; }
+    .footer-nav a:hover { color: #fff; }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.4); }
+    .footer-disclaimer { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 10px; line-height: 1.8; }
+
+    @media screen and (max-width: 900px) {
+      .lakanto-intro { grid-template-columns: 1fr; gap: 24px; text-align: center; }
+      .lakanto-intro-img { max-width: 220px; margin: 0 auto; }
+      .lakanto-badges { justify-content: center; }
+      .link-cards { grid-template-columns: 1fr; max-width: 460px; margin: 0 auto; }
+      /* 狭い画面では主役カードも縦組みに戻す */
+      .link-card--lead { flex-direction: column; }
+      .link-card--lead .link-card-visual { flex: none; aspect-ratio: 16/10; }
+      .link-card--lead .link-card-body { padding: 22px 22px 26px; }
+      .link-card--lead .link-card-cta { align-self: stretch; }
+    }
+
+    @media screen and (max-width: 480px) {
+      .container { padding: 0 16px; }
+      .result-card { padding: 28px 18px; border-radius: 20px; }
+      .gauge-wrap { width: 200px; }
+      .gauge-score { font-size: 52px; }
+      .scale-step { font-size: 11px; padding: 8px 4px; }
+      .recipe-item { flex: 0 0 150px; }
+      .footer-top { flex-direction: column; gap: 20px; }
+    }
+
+    /* ===== キーボード操作時の可視性 ===== */
+    :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+    .recipe-strip :focus-visible,
+    footer :focus-visible { outline-color: #fff; }
+
+    /* ===== 動きを減らす設定への対応（WCAG 2.3.3 / 2.2.2）===== */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .recipe-row { animation: none !important; }
+    }
+
+    @media print {
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      @page { margin: 10mm; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== PASSWORD GATE ===== -->
+<style>
+  #pw-gate {
+    position: fixed; inset: 0; z-index: 1000; /* header(900)・追従CTA(950)より上 */
+    display: flex; align-items: center; justify-content: center;
+    background: #2E1010; font-family: 'Noto Sans JP', sans-serif;
+  }
+  #pw-gate.hidden { display: none; }
+  body.pw-locked { overflow: hidden; }
+  #pw-box {
+    background: #FFFDF8; padding: 40px 32px; border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    width: min(360px, 88vw); text-align: center;
+  }
+  #pw-box h1 { font-size: 20px; color: #6B1010; margin-bottom: 8px; }
+  #pw-box p { font-size: 13px; color: #7A7070; margin-bottom: 24px; }
+  #pw-input {
+    width: 100%; padding: 12px 14px; font-size: 16px;
+    border: 2px solid #E8D8D8; border-radius: 8px; outline: none;
+  }
+  #pw-input:focus { border-color: #CC2010; }
+  #pw-btn {
+    width: 100%; margin-top: 14px; padding: 12px; font-size: 15px; font-weight: 700;
+    color: #fff; background: #CC2010; border: none; border-radius: 8px; cursor: pointer;
+  }
+  #pw-btn:hover { opacity: .88; }
+  #pw-error { color: #CC2010; font-size: 13px; margin-top: 12px; min-height: 18px; }
+</style>
+<div id="pw-gate">
+  <div id="pw-box">
+    <h1>糖質疲労LAB</h1>
+    <p>閲覧にはパスワードが必要です</p>
+    <input id="pw-input" type="password" placeholder="パスワード" autocomplete="off" autofocus>
+    <button id="pw-btn" type="button">入る</button>
+    <div id="pw-error"></div>
+  </div>
+</div>
+<script>
+  (function () {
+    var PASSWORD = 'martinlab';
+    var KEY = 'tsl_pw_ok';
+    var gate = document.getElementById('pw-gate');
+    var input = document.getElementById('pw-input');
+    var btn = document.getElementById('pw-btn');
+    var err = document.getElementById('pw-error');
+    function unlock() { gate.classList.add('hidden'); document.body.classList.remove('pw-locked'); }
+    function check() {
+      if (input.value === PASSWORD) {
+        try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+        unlock();
+      } else { err.textContent = 'パスワードが違います'; input.value = ''; input.focus(); }
+    }
+    document.body.classList.add('pw-locked');
+    var ok = false;
+    try { ok = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+    if (ok) { unlock(); }
+    btn.addEventListener('click', check);
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') check(); });
+  })();
+</script>
+<!-- ===== /PASSWORD GATE ===== -->
+
+<header>
+  <div class="header-inner">
+    <a href="mockup_ver6.html" class="logo-en">糖質疲労LAB</a>
+    <a href="mockup_ver6.html" class="btn-back-top">トップにもどる</a>
+  </div>
+</header>
+
+<!-- ===== 判定結果 ===== -->
+<section id="result">
+  <div class="container container--narrow">
+    <p class="result-lead">あなたの<strong>糖質疲労度</strong>は…</p>
+
+    <div class="result-card">
+      <div class="gauge-wrap">
+        <svg class="gauge" viewBox="0 0 200 200" aria-hidden="true">
+          <circle class="gauge-track" cx="100" cy="100" r="86"></circle>
+          <circle class="gauge-fill" id="gauge-fill" cx="100" cy="100" r="86"
+                  stroke-dasharray="540.35" stroke-dashoffset="540.35"></circle>
+        </svg>
+        <div class="gauge-center">
+          <span class="gauge-score" id="score-num">0<small>/20</small></span>
+          <span class="gauge-caption">SCORE</span>
+        </div>
+      </div>
+
+      <span class="result-badge" id="result-badge">LEVEL 1</span>
+      <h1 class="result-name" id="result-name">判定</h1>
+      <p class="result-desc" id="result-desc">説明</p>
+
+      <div class="result-scale">
+        <div class="scale-step" data-lv="1">レベル1<br>ひとまず安心</div>
+        <div class="scale-step" data-lv="2">レベル2<br>糖質疲労 予備軍</div>
+        <div class="scale-step" data-lv="3">レベル3<br>糖質疲労の疑い大</div>
+      </div>
+    </div>
+
+    <div class="result-retry">
+      <a href="mockup_ver6_check.html">もう一度チェックする</a>
+    </div>
+
+    <p class="result-note">
+      ※ 本チェックは医学的な診断ではありません。生活習慣を振り返るための簡易チェックです。<br>
+      気になる症状が続く場合は医療機関にご相談ください。
+    </p>
+  </div>
+</section>
+
+<div class="flow-arrow"><span></span></div>
+
+<!-- ===== 食事で糖質疲労対策（ここで初めてラカント登場） ===== -->
+<section id="action">
+  <div class="container">
+    <p class="section-label">ACTION</p>
+    <h2 class="section-title">食事で<span class="marker">糖質疲労対策</span></h2>
+
+    <p class="action-lead">
+      がまんは続きません。続くのは<strong>「置きかえ」</strong>です。<br>
+      いつも使っている砂糖を替えるだけなら、今日の夕飯から始められます。<br>
+      そこで使えるのが、植物由来の甘味料<strong>「ラカント」</strong>。
+    </p>
+
+    <div class="lakanto-intro">
+      <div class="lakanto-intro-img">
+        <img src="sozai/lucantpacage.png" alt="ラカントS 顆粒">
+      </div>
+      <div>
+        <h3 class="lakanto-intro-title">砂糖を「ラカント」に。<br>それだけで、糖質オフ。</h3>
+        <p class="lakanto-intro-body">
+          「ラカント」は、中国・桂林地方の山岳地帯にのみ育つウリ科の植物「羅漢果（ラカンカ）」の高純度エキスと、
+          とうもろこし由来の発酵甘味料エリスリトールからつくられた自然派甘味料。<br>
+          砂糖と同じ甘さでそのまま使えて、カロリーゼロ・ロカボ糖質ゼロ。加熱しても甘さが変わらないので、
+          煮物にも焼き菓子にも使えます。
+        </p>
+        <div class="lakanto-badges">
+          <span class="lakanto-badge">カロリーゼロ</span>
+          <span class="lakanto-badge">ロカボ糖質ゼロ</span>
+          <span class="lakanto-badge">植物由来</span>
+          <span class="lakanto-badge">砂糖と同じ甘さ</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="link-cards">
+      <!-- 主役：まずはレシピから入ってもらう -->
+      <a href="https://www.lakanto.jp/recipe/" target="_blank" rel="noopener noreferrer" class="link-card link-card--lead">
+        <div class="link-card-visual">
+          <img src="sozai/レシピ/09.png" alt="ラカントを使ったレシピ">
+        </div>
+        <div class="link-card-body">
+          <p class="link-card-tag">RECIPE</p>
+          <h3 class="link-card-title">まずは、今日の一品から。</h3>
+          <p class="link-card-desc">毎日のおかずから、がまんしないスイーツまで。砂糖を置きかえるだけのレシピを、たっぷり公開しています。</p>
+          <span class="link-card-cta">おすすめレシピを見る</span>
+        </div>
+      </a>
+
+      <a href="https://www.lakanto.jp/" target="_blank" rel="noopener noreferrer" class="link-card">
+        <div class="link-card-visual contain">
+          <img src="sozai/lucanka.png" alt="羅漢果">
+        </div>
+        <div class="link-card-body">
+          <p class="link-card-tag">OFFICIAL SITE</p>
+          <h3 class="link-card-title">ラカント公式サイト</h3>
+          <p class="link-card-desc">ラカントってどんな甘味料？ 種類も使い方も、買える場所もこちらに。</p>
+          <span class="link-card-cta">公式サイトを見る</span>
+        </div>
+      </a>
+
+      <a href="https://www.lakanto.jp/" target="_blank" rel="noopener noreferrer" class="link-card">
+        <div class="link-card-visual mail">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.5"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="8" y="16" width="48" height="32" rx="4"/>
+            <path d="M8 21l24 16 24-16"/>
+          </svg>
+        </div>
+        <div class="link-card-body">
+          <p class="link-card-tag">MAIL MAGAZINE</p>
+          <h3 class="link-card-title">ラカント<br>メールマガジン</h3>
+          <p class="link-card-desc">季節のレシピやお得なキャンペーン情報を定期的にお届け。登録は無料です。</p>
+          <span class="link-card-cta">メルマガに登録する</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- レシピ帯 -->
+<div class="recipe-strip">
+  <div class="recipe-row" id="recipe-row"></div>
+  <button class="recipe-pause" id="recipe-pause" type="button" aria-label="レシピ画像の動きを止める">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+      <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+    </svg>
+  </button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-logo">
+        <span class="footer-logo-en">糖質疲労LAB</span>
+      </div>
+      <nav class="footer-nav">
+        <a href="mockup_ver6.html">トップ</a>
+        <a href="mockup_ver6.html#section-about">糖質疲労とは</a>
+        <a href="mockup_ver6.html#section-doctor">山田悟先生</a>
+        <a href="mockup_ver6_check.html">糖質疲労チェック</a>
+      </nav>
+    </div>
+    <p class="footer-copy">© 2026 SARAYA Co., Ltd. All Rights Reserved.</p>
+    <p class="footer-disclaimer">
+      本サイトの情報は健康に関する一般的な情報提供を目的としたものであり、医薬品的な効果効能を示すものではありません。<br>
+      本品は食品です。症状が続く場合は医療機関にご相談ください。
+    </p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // ---- スコア取得（クエリ優先、なければsessionStorage） ----
+  var params = new URLSearchParams(location.search);
+  var max = parseInt(params.get('m'), 10);
+  var score = parseInt(params.get('s'), 10);
+
+  if (isNaN(score)) {
+    try { score = parseInt(sessionStorage.getItem('tsl_score'), 10); } catch (e) {}
+  }
+  if (isNaN(max) || max <= 0) { max = 20; }
+
+  // スコアが無い＝チェック未実施 → チェックページへ
+  if (isNaN(score)) {
+    location.replace('mockup_ver6_check.html');
+    return;
+  }
+  score = Math.max(0, Math.min(max, score));
+
+  // ---- 判定レベル ----
+  var ratio = score / max;
+  var level;
+  if (ratio < 0.35) {
+    level = {
+      n: 1, color: '#6BA600', name: '糖質疲労リスク 低',
+      desc: '気になるサインは、今のところあまり出ていないようです。ただ、食事は1日3回の積み重ね。今の食べ方をキープしつつ、甘いものと主食の量だけ、気にとめておくと安心です。'
+    };
+  } else if (ratio < 0.65) {
+    level = {
+      n: 2, color: '#E87820', name: '糖質疲労 予備軍',
+      desc: '食後の眠気やだるさなど、気になるサインがいくつか出ています。まだ「たまに」の段階ですが、放っておくと、それが当たり前になっていきます。まずは、お昼に何を食べているか思い出すところから。'
+    };
+  } else {
+    level = {
+      n: 3, color: '#CC2010', name: '糖質疲労の可能性 大',
+      desc: '当てはまった項目が、かなり多めです。食事のたびに血糖値がジェットコースターになっている可能性があります。とはいえ、いきなり主食を抜く必要はありません。今日の一食を「置きかえ」から変えていきましょう。'
+    };
+  }
+
+  document.documentElement.style.setProperty('--lv', level.color);
+  document.getElementById('result-badge').textContent = 'LEVEL ' + level.n;
+  document.getElementById('result-name').textContent = level.name;
+  document.getElementById('result-desc').textContent = level.desc;
+  document.getElementById('score-num').innerHTML = score + '<small>/' + max + '</small>';
+
+  var steps = document.querySelectorAll('.scale-step');
+  steps.forEach(function (el) {
+    if (parseInt(el.getAttribute('data-lv'), 10) === level.n) el.classList.add('on');
+  });
+
+  // 「動きを減らす」設定の端末では、演出を省いて最初から結果を見せる
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- ゲージアニメーション ----
+  var C = 2 * Math.PI * 86; // 540.35
+  var fill = document.getElementById('gauge-fill');
+  fill.setAttribute('stroke-dasharray', C.toFixed(2));
+  fill.setAttribute('stroke-dashoffset', reduce ? (C * (1 - ratio)).toFixed(2) : C.toFixed(2));
+  if (!reduce) {
+    setTimeout(function () {
+      fill.style.strokeDashoffset = (C * (1 - ratio)).toFixed(2);
+    }, 250);
+  }
+
+  // スコアのカウントアップ
+  var el = document.getElementById('score-num');
+  var start = null, dur = 1200;
+  function step(ts) {
+    if (!start) start = ts;
+    var p = Math.min((ts - start) / dur, 1);
+    var v = Math.round(score * (1 - Math.pow(1 - p, 3)));
+    el.innerHTML = v + '<small>/' + max + '</small>';
+    if (p < 1) requestAnimationFrame(step);
+  }
+  if (!reduce) {
+    setTimeout(function () { requestAnimationFrame(step); }, 250);
+  }
+
+  // ---- レシピ帯（画像を並べて無限ループ） ----
+  var nums = ['02','05','07','11','14','18','21','25','28','31','33','04'];
+  var row = document.getElementById('recipe-row');
+  var html = nums.map(function (n) {
+    return '<div class="recipe-item"><img src="sozai/レシピ/' + n + '.png" alt="ラカントレシピ" loading="lazy"></div>';
+  }).join('');
+  row.innerHTML = html + html; // 2周分でシームレスループ
+
+  // ---- レシピ帯の停止ボタン（WCAG 2.2.2）----
+  var PAUSE_ICON = '<rect x="6" y="4" width="4" height="16" rx="1"></rect>' +
+                   '<rect x="14" y="4" width="4" height="16" rx="1"></rect>';
+  var PLAY_ICON  = '<path d="M8 5l12 7-12 7z"></path>';
+  var pauseBtn = document.getElementById('recipe-pause');
+
+  pauseBtn.addEventListener('click', function () {
+    var paused = row.classList.toggle('is-paused');
+    pauseBtn.querySelector('svg').innerHTML = paused ? PLAY_ICON : PAUSE_ICON;
+    pauseBtn.setAttribute('aria-label', paused ? 'レシピ画像を動かす' : 'レシピ画像の動きを止める');
+  });
+
+  // 「動きを減らす」設定の端末では、最初から止めておく
+  if (reduce) {
+    row.classList.add('is-paused');
+    pauseBtn.querySelector('svg').innerHTML = PLAY_ICON;
+    pauseBtn.setAttribute('aria-label', 'レシピ画像を動かす');
+  }
+
+  // ---- BudouX：日本語を文節単位で改行させる ----
+  // 判定結果の文言はJSで差し込むので、差し込んだ後にまとめて適用する。
+  // 中身を <budoux-ja> に入れてDOMに挿すと、その瞬間に改行位置が入る（同期）。
+  // 直後に中身を取り出して <budoux-ja> は捨てる。
+  // ※ 残したままだと、要素がテキストの変更を監視していて後段のstickyFixの結果を
+  //   自動で元に戻してしまうため。外したあとは .jp-break で改行位置を固定する。
+  // 「この」「その」「という」など、行末に取り残したくない語の直後の
+  // 改行位置（BudouXが入れるゼロ幅スペース）を削り、後ろの語とくっつける。
+  // 語を増やしたいときはこの配列に足すだけでよい。
+  var ZW = String.fromCharCode(0x200B);
+  var STICKY = [
+    [new RegExp('(この|その|あの|どの)' + ZW, 'g'), '$1'],   // 指示連体詞
+    [new RegExp('と' + ZW + '?いう' + ZW, 'g'), 'という'],   // 「という」は と|いう と分割される
+    [new RegExp('と' + ZW + '?いった' + ZW, 'g'), 'といった'],
+    [new RegExp('(いわゆる|あらゆる|さまざまな|様々な|ちょっとした)' + ZW, 'g'), '$1']
+  ];
+
+  // BudouXの分割ミスで「が|まん」のように語中で改行される語。
+  // 語中の改行位置をすべて取り除いて1語に戻す。気になる切れ方が出たらここに足す。
+  var NOSPLIT = [
+    'だるさ', 'しくみ', 'がまん', 'ひとまず', 'とはいえ',
+    '当てはまっ', '気になる', 'よくある', '毎日', '片づけられがち'
+  ];
+
+  function joinWords(s) {
+    NOSPLIT.forEach(function (w) {
+      s = s.replace(new RegExp(w.split('').join(ZW + '?'), 'g'), w);
+    });
+    return s;
+  }
+
+  function applyBudouX() {
+    document.querySelectorAll(
+      '.result-lead, .result-name, .result-desc, .result-note,' +
+      '.section-title, .action-lead,' +
+      '.lakanto-intro-title, .lakanto-intro-body, .lakanto-badge,' +
+      '.link-card-title, .link-card-desc, .scale-step, .footer-disclaimer'
+    ).forEach(function (el) {
+      var b = document.createElement('budoux-ja');
+      while (el.firstChild) { b.appendChild(el.firstChild); }
+      el.appendChild(b);
+      while (b.firstChild) { el.insertBefore(b.firstChild, b); }
+      el.removeChild(b);
+      el.normalize();
+      // keep-all は「改行位置が入った時だけ」付ける。
+      // CDNが読めなかった場合に付けると、どこでも改行できず文字があふれるため。
+      if (el.textContent.indexOf(ZW) >= 0) { el.classList.add('jp-break'); }
+    });
+
+    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    var nodes = [], tn;
+    while ((tn = walker.nextNode())) { nodes.push(tn); }
+    nodes.forEach(function (t) {
+      if (t.data.indexOf(ZW) < 0) return;
+      var s = joinWords(t.data);
+      STICKY.forEach(function (r) { s = s.replace(r[0], r[1]); });
+      // 「」で囲んだ短い語（10文字以内）は、その中で改行しない
+      s = s.replace(/「([^」]{1,14})」/g, function (m, inner) {
+        var plain = inner.split(ZW).join('');
+        return plain.length <= 10 ? '「' + plain + '」' : m;
+      });
+      if (s !== t.data) { t.data = s; }
+    });
+  }
+
+  // BudouXはdeferで読み込むので、DOMContentLoadedまで待たないと
+  // <budoux-ja> がまだ定義されておらず、改行位置が入らない
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyBudouX);
+  } else {
+    applyBudouX();
+  }
+})();
+</script>
+
+</body>
+</html>

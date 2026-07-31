@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 先方確認用のモックアップ。検索結果に載らないようにする -->
+  <meta name="robots" content="noindex, nofollow">
+  <title>糖質疲労LAB</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- 日本語の改行位置を文節単位にする（Google製 BudouX） -->
+  <script src="https://unpkg.com/budoux@0.8.4/bundle/budoux-ja.min.js" defer></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent:     #CC2010;   /* メイン赤 */
+      --accent-dk:  #8c0c12;
+      --navy:       #6B1010;
+      --orange:     #E87820;
+      --yellow:     #FFD21A;
+      --yellow-lt:  #FFF3C4;
+      --cream:      #FDF6EC;
+      --offwhite:   #F8F2F2;
+      --gray:       #7A7070;
+      --gray-light: #E8D8D8;
+      --line:       #DDC9B8;   /* カードの罫線（下地に合わせた暖色のヘアライン） */
+      --white:      #FFFDF8;
+      --ink:        #2E1010;
+    }
+
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      color: var(--ink);
+      background: var(--cream);
+      font-size: 16px;
+      line-height: 1.9;
+      overflow-x: hidden;
+    }
+
+    img { max-width: 100%; }
+
+    /* ===== 日本語の改行コントロール =====
+       ① BudouX（JS）が文節ごとに <wbr> を入れる … 全ブラウザ対応
+       ② word-break: auto-phrase … Chrome系のみ。①が使えない時の保険
+       ③ text-wrap: balance / pretty … 行の長さを揃える・泣き別れを防ぐ */
+    body { word-break: auto-phrase; }
+
+    /* BudouXが入れた位置「だけ」で改行させる（keep-allで文字単位の改行を止める） */
+    .jp-break { word-break: keep-all; overflow-wrap: break-word; }
+
+    h1, h2, h3,
+    .fv-catch, .sec-h, .about-statement, .cta-catch, .worry-after {
+      text-wrap: balance;
+    }
+
+    p, li, .doc-bubble, .qa-a { text-wrap: pretty; }
+
+    /* BudouXが語の途中で切ってしまう語だけ、明示的に改行禁止にする */
+    .nb { white-space: nowrap; }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* ===== 汎用アニメーション ===== */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
+    .anim { opacity: 0; }
+    .anim.active { animation: fadeInUp 0.7s ease-out forwards; }
+    .anim.d1.active { animation-delay: .1s; }
+    .anim.d2.active { animation-delay: .2s; }
+    .anim.d3.active { animation-delay: .3s; }
+
+    @keyframes bounceY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    @keyframes shine {
+      0% { left: -60%; } 60% { left: 130%; } 100% { left: 130%; }
+    }
+
+    /* ===== 共通パーツ ===== */
+    .marker {
+      background: linear-gradient(transparent 56%, var(--yellow) 56%, #ffc400 100%);
+      padding: 0 .12em;
+      font-weight: 900;
+    }
+    .red { color: var(--accent); }
+    .big { font-size: 1.25em; }
+    .sp-only { display: none; }
+
+    /* テキスト内の小さな三角。文字（▶）だと環境でギザついたり字形が変わるのでSVGで描く */
+    .tri { width: .62em; height: .72em; vertical-align: -.04em; margin-right: .35em; }
+
+    /* セクションの余白は一律にせず、内容に応じて詰める／広げる */
+    .sec { padding: 64px 0; position: relative; }
+    #worry { padding: 52px 0 44px; }   /* 悩み提示は短く畳んで次へ送る */
+    #about { padding: 56px 0 48px; }
+    #graph { padding: 48px 0 72px; }   /* 図解は下を広めに取って一拍おく */
+    #doctor { padding: 72px 0; }       /* 監修医は独立した面として見せる */
+    #qa { padding: 56px 0 64px; }
+
+
+    .sec-h {
+      font-size: clamp(25px, 4.6vw, 42px);
+      font-weight: 900;
+      line-height: 1.4;
+      text-align: center;
+      letter-spacing: -.01em;
+      margin-bottom: 28px;
+    }
+
+    .sec-lead {
+      font-size: clamp(15px, 1.7vw, 18px);
+      line-height: 2.1;
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    /* 見出しリボン */
+    .ribbon-h {
+      display: inline-block;
+      background: linear-gradient(120deg, var(--accent-dk) 0%, var(--accent) 100%);
+      color: #fff;
+      font-size: clamp(17px, 2.4vw, 24px);
+      font-weight: 900;
+      padding: 10px 34px;
+      border-radius: 999px;
+      box-shadow: 0 8px 20px rgba(204,32,16,.25);
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      position: sticky; top: 0; z-index: 900;
+      background: rgba(253,246,236,.97);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border-bottom: 3px solid var(--accent);
+      padding: 10px 0;
+    }
+
+    .header-inner {
+      max-width: 960px; margin: 0 auto; padding: 0 20px;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    }
+
+    .logo-en { font-size: 19px; font-weight: 900; color: var(--accent); letter-spacing: .02em; }
+    .logo-sub { display: block; font-size: 10px; color: var(--gray); font-weight: 500; letter-spacing: .06em; }
+
+    /* ページ内のCTAと同じ「押せる立体ボタン」に揃える。
+       ぼかし影だと平らなヘッダーの上で浮いて見えるため、下に厚みを付ける */
+    .btn-nav {
+      background: linear-gradient(180deg, #E8452F 0%, var(--accent) 55%, #A81010 100%);
+      color: #fff;
+      padding: 9px 22px 10px; border-radius: 999px;
+      text-decoration: none; font-size: 13px; font-weight: 900; white-space: nowrap;
+      letter-spacing: .02em;
+      box-shadow: 0 3px 0 #7d0d08;
+      transition: transform .12s, box-shadow .12s;
+    }
+    .btn-nav:hover { transform: translateY(1px); box-shadow: 0 2px 0 #7d0d08; }
+    .btn-nav:active { transform: translateY(3px); box-shadow: 0 0 0 #7d0d08; }
+
+    /* ===== ファーストビュー ===== */
+    .fv { position: relative; overflow: hidden; background: var(--cream); }
+
+    .fv-photo { position: absolute; inset: 0; z-index: 0; }
+    .fv-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 72% center; }
+
+    .fv::after {
+      content: '';
+      position: absolute; inset: 0; z-index: 1;
+      background: linear-gradient(100deg,
+        rgba(253,246,236,.97) 0%,
+        rgba(253,246,236,.93) 34%,
+        rgba(253,246,236,.55) 52%,
+        rgba(253,246,236,0) 72%);
+      pointer-events: none;
+    }
+
+    .fv-inner {
+      position: relative; z-index: 2;
+      max-width: 960px; margin: 0 auto; padding: 56px 24px 72px;
+      min-height: 520px;
+      display: flex; align-items: center;
+    }
+
+    .fv-text { max-width: 560px; }
+
+    .fv-sub {
+      font-size: clamp(15px, 2vw, 19px);
+      font-weight: 700; color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .fv-catch {
+      font-size: clamp(29px, 5.6vw, 50px);
+      font-weight: 900;
+      line-height: 1.28;
+      letter-spacing: -.02em;
+      margin-bottom: 18px;
+      text-shadow: 0 2px 0 rgba(255,255,255,.9);
+    }
+    .fv-catch .kw {
+      color: var(--accent);
+      background: linear-gradient(transparent 58%, var(--yellow) 58%, #ffc400 100%);
+      padding: 0 .06em;
+    }
+    .fv-catch .qm { font-size: 1.1em; letter-spacing: .06em; }
+
+    .fv-desc { font-size: clamp(14px, 1.6vw, 17px); line-height: 1.95; color: #4a2020; margin-bottom: 26px; }
+
+    /* CTAボタン（共通） */
+    .btn-cta {
+      position: relative;
+      display: inline-flex; flex-direction: column; align-items: center;
+      background: linear-gradient(180deg, #E8452F 0%, var(--accent) 55%, #A81010 100%);
+      color: #fff;
+      text-decoration: none;
+      padding: 18px 46px;
+      border-radius: 999px;
+      box-shadow: 0 8px 0 #7d0d08, 0 16px 30px rgba(204,32,16,.35);
+      overflow: hidden;
+      animation: bounceY 2.4s ease-in-out infinite;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-cta:active { transform: translateY(5px); box-shadow: 0 3px 0 #7d0d08, 0 8px 16px rgba(204,32,16,.35); }
+    .btn-cta::after {
+      content: '';
+      position: absolute; top: -50%; left: -60%;
+      width: 40%; height: 200%;
+      background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.55) 50%, rgba(255,255,255,0) 100%);
+      transform: rotate(18deg);
+      animation: shine 3.2s ease-in-out infinite;
+    }
+    .btn-cta-sm { font-size: clamp(12px, 1.4vw, 14px); font-weight: 700; opacity: .95; letter-spacing: .04em; }
+    .btn-cta-lg { font-size: clamp(18px, 2.6vw, 26px); font-weight: 900; letter-spacing: .02em; }
+
+    .cta-under { font-size: 12px; color: var(--gray); margin-top: 10px; }
+
+    /* FV下の斜め帯 */
+    .fv-strip {
+      position: relative; z-index: 3;
+      background: linear-gradient(120deg, #c8101a 0%, #e21f28 100%);
+      color: #fff;
+      text-align: center;
+      padding: 14px 20px;
+      font-size: clamp(14px, 2.1vw, 22px);
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: .04em;
+    }
+
+    /* ===== 悩みチェック ===== */
+    #worry { background: var(--white); }
+
+    .worry-box {
+      background: var(--cream);
+      border: 2px dashed var(--accent);
+      border-radius: 12px;
+      padding: 36px 32px;
+      max-width: 720px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .worry-list { list-style: none; display: grid; gap: 14px; }
+
+    .worry-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      font-size: clamp(15px, 1.9vw, 19px);
+      font-weight: 700;
+      line-height: 1.6;
+    }
+
+    .worry-check {
+      flex: 0 0 28px; height: 28px; margin-top: 3px;
+      border: 3px solid var(--accent);
+      border-radius: 6px;
+      background: var(--white);
+      position: relative;
+    }
+    .worry-check::after {
+      content: '✓';
+      position: absolute; inset: -6px 0 0 1px;
+      color: var(--accent);
+      font-size: 26px; font-weight: 900; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .worry-after {
+      text-align: center;
+      margin-top: 32px;
+      font-size: clamp(16px, 2.2vw, 22px);
+      font-weight: 900;
+    }
+
+    /* 「黄色信号」は赤字ではなく、実際に黄色で見せる。
+       信号機の黄が点いている絵＋黄色の下地に濃い文字（黄色い文字は薄くて読めないため） */
+    .signal {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 12px;
+      font-size: clamp(20px, 3vw, 30px);
+      font-weight: 900;
+      color: var(--ink);
+    }
+
+    .signal-lamps {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      background: #3a2a10;
+      border-radius: 999px;
+      flex: 0 0 auto;
+    }
+
+    .lamp {
+      width: .62em; height: .62em;
+      border-radius: 50%;
+      display: block;
+    }
+    .lamp--off { background: rgba(255,255,255,.16); }
+    .lamp--on {
+      background: var(--yellow);
+      box-shadow: 0 0 0 3px rgba(255,210,26,.35), 0 0 14px 4px rgba(255,210,26,.75);
+      animation: lampBlink 1.6s ease-in-out infinite;
+    }
+
+    @keyframes lampBlink {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: .45; }
+    }
+
+    .signal-text {
+      background: linear-gradient(180deg, #FFE45C 0%, var(--yellow) 100%);
+      color: var(--ink);
+      padding: .12em .4em .18em;
+      border-radius: 6px;
+      box-shadow: 0 3px 0 #d9a800;
+    }
+
+    .arrow-down {
+      width: 0; height: 0;
+      margin: 18px auto 0;
+      border-left: 34px solid transparent;
+      border-right: 34px solid transparent;
+      border-top: 26px solid var(--accent);
+      animation: bounceY 1.8s ease-in-out infinite;
+    }
+
+    /* ===== 糖質疲労とは ===== */
+    #about { background: var(--cream); }
+
+    .about-statement {
+      text-align: center;
+      font-size: clamp(22px, 3.6vw, 36px);
+      font-weight: 900;
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
+
+    .about-card {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 32px 30px;
+      border: 1px solid var(--line);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .about-card p { font-size: clamp(15px, 1.7vw, 17px); line-height: 2.1; }
+    .about-card p + p { margin-top: 14px; }
+
+    /* ※ 症状3枚の等幅カード（.about-points）は削除。
+       上の「こんなこと、ありませんか？」と内容が重複しており、
+       かつ「アイコン上＋見出し＋3行本文の等幅3列」はAI生成の典型形だったため。 */
+
+    /* ===== 図解 ===== */
+    #graph { background: var(--white); }
+
+    /* グラフに添える指示コピー（サプリLPの定番。グラフの前に短く言い切る） */
+    .graph-lead {
+      text-align: center;
+      font-size: clamp(19px, 2.8vw, 28px);
+      font-weight: 900;
+      color: var(--accent);
+      line-height: 1.4;
+      margin-bottom: 14px;
+    }
+
+    /* グラフ画像は自前で赤い角丸枠を持っているので、外側の枠は付けない（額縁の二重掛けを避ける） */
+    .graph-frame {
+      padding: 0 8px;
+    }
+    .graph-frame img { display: block; width: 100%; height: auto; }
+    .graph-caption { font-size: 12px; color: var(--gray); text-align: right; margin-top: 8px; }
+
+    /* 等幅4列をやめ、1→4と進むほど下に落ちる階段状に。
+       「上がって→落ちて→疲れて→リスク」という中身の流れと形を一致させる */
+    .steps-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      align-items: start;
+      margin-top: 40px;
+    }
+
+    .step:nth-child(1) { margin-top: 0; }
+    .step:nth-child(2) { margin-top: 44px; }
+    .step:nth-child(3) { margin-top: 88px; }
+    .step:nth-child(4) { margin-top: 132px; }
+
+    .step {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px 16px 20px;
+      position: relative;
+    }
+
+    /* 最後の1枚＝結末なので、ここだけ重くして均一さを崩す */
+    .step:last-child {
+      background: var(--yellow-lt);
+      border: 2px solid var(--accent);
+    }
+
+    .step img { display: block; width: 100%; max-width: 160px; margin: 0 auto 10px; }
+
+    .step-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: clamp(15px, 1.8vw, 18px);
+      font-weight: 900;
+      color: var(--navy);
+      line-height: 1.4;
+    }
+    .step-num {
+      flex: 0 0 auto;
+      width: 1.6em; height: 1.6em;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--accent); color: #fff;
+      border-radius: 6px;
+      font-family: 'Inter', sans-serif; font-weight: 700; font-size: .9em; line-height: 1;
+    }
+
+    /* ===== 監修医 ===== */
+    #doctor { background: var(--cream); }
+
+    .doc-wrap {
+      display: grid; grid-template-columns: 240px 1fr; gap: 36px;
+      align-items: center;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 36px;
+    }
+
+    .doc-photo {
+      width: 100%; aspect-ratio: 1/1;
+      border-radius: 50%;
+      border: 5px solid var(--accent);
+      overflow: hidden;
+    }
+    .doc-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+
+    .doc-role { font-size: 13px; color: var(--gray); line-height: 1.7; }
+    .doc-name { font-size: clamp(22px, 3vw, 30px); font-weight: 900; margin: 2px 0 14px; }
+    .doc-name span { font-size: .5em; font-weight: 700; margin-left: 8px; color: var(--gray); }
+
+    .doc-bubble {
+      position: relative;
+      background: var(--yellow-lt);
+      border: 2px solid var(--yellow);
+      border-radius: 10px;
+      padding: 18px 20px;
+      font-size: clamp(14px, 1.6vw, 16px);
+      line-height: 1.95;
+      margin-bottom: 16px;
+    }
+    .doc-bubble::before {
+      content: '';
+      position: absolute; left: -13px; top: 30px;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-right: 13px solid var(--yellow);
+    }
+
+
+    /* ===== CTAセクション ===== */
+    #cta {
+      background: linear-gradient(160deg, #A81010 0%, var(--accent) 45%, var(--orange) 100%);
+      color: #fff;
+      text-align: center;
+      padding: 56px 0 60px;
+    }
+
+    #cta .cta-catch {
+      font-size: clamp(23px, 4.2vw, 38px);
+      font-weight: 900;
+      line-height: 1.4;
+      margin-bottom: 10px;
+      text-shadow: 0 3px 10px rgba(0,0,0,.2);
+    }
+    /* 白文字に黄色マーカーを重ねると、文字の下半分が白on黄になって読めない。
+       黄色を地にして文字を濃くする（「黄色信号」の板と同じ処理） */
+    #cta .cta-catch .hl {
+      display: inline-block;
+      background: linear-gradient(180deg, #FFE45C 0%, var(--yellow) 100%);
+      color: var(--ink);
+      padding: .06em .36em .12em;
+      border-radius: 8px;
+      box-shadow: 0 4px 0 #d9a800;
+      text-shadow: none;
+      margin-top: 6px;
+    }
+    #cta .cta-sub { font-size: clamp(14px, 1.7vw, 17px); margin-bottom: 28px; opacity: .95; }
+
+    #cta .btn-cta {
+      background: linear-gradient(180deg, #FFE45C 0%, var(--yellow) 55%, #E8A800 100%);
+      color: var(--accent-dk);
+      box-shadow: 0 8px 0 #b58200, 0 16px 34px rgba(0,0,0,.3);
+    }
+    #cta .btn-cta:active { box-shadow: 0 3px 0 #b58200, 0 8px 16px rgba(0,0,0,.3); }
+
+    #cta .cta-note { font-size: 12px; opacity: .8; margin-top: 18px; line-height: 1.8; }
+
+
+    /* ===== Q&A ===== */
+    #qa { background: var(--white); }
+
+    .qa-list { max-width: 780px; margin: 0 auto; display: grid; gap: 12px; }
+
+    .qa {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .qa[open] { border-color: var(--accent); }
+
+    .qa summary {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 16px 20px;
+      font-size: clamp(15px, 1.7vw, 17px);
+      font-weight: 700;
+      cursor: pointer;
+      list-style: none;
+      background: var(--offwhite);
+    }
+    .qa summary::-webkit-details-marker { display: none; }
+    .qa summary::before {
+      content: 'Q';
+      flex: 0 0 26px; height: 26px;
+      background: var(--accent); color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px;
+    }
+    .qa summary::after {
+      content: '＋';
+      margin-left: auto; color: var(--accent); font-weight: 900;
+    }
+    .qa[open] summary::after { content: '−'; }
+
+    .qa-a {
+      display: flex; gap: 12px;
+      padding: 16px 20px 20px;
+      font-size: 15px; line-height: 1.95;
+      color: #4a2020;
+    }
+    .qa-a::before {
+      content: 'A';
+      flex: 0 0 26px; height: 26px;
+      background: var(--gray-light); color: var(--navy);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px;
+    }
+
+    /* ===== 区切り帯 ===== */
+    .dot-band {
+      height: 60px;
+      background: #d42a2a;
+      display: flex; align-items: center; justify-content: center; gap: 36px;
+    }
+    .dot-group { display: flex; gap: 14px; align-items: center; }
+    .dot { width: 18px; height: 18px; border-radius: 50%; background: var(--white); opacity: .6; }
+    .dot.lg { width: 26px; height: 26px; opacity: .8; }
+    .dot.sm { width: 12px; height: 12px; opacity: .4; }
+
+    /* ===== FOOTER ===== */
+    footer { background: var(--navy); color: rgba(255,255,255,.7); padding: 36px 0 24px; }
+    .footer-inner { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+    .footer-top {
+      display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 28px;
+      padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 18px;
+    }
+    .footer-logo-en { font-size: 18px; font-weight: 900; color: #fff; }
+    .footer-nav { display: flex; gap: 26px; flex-wrap: wrap; }
+    .footer-nav a { font-size: 13px; color: rgba(255,255,255,.6); text-decoration: none; }
+    .footer-nav a:hover { color: #fff; }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,.4); }
+    .footer-disclaimer { font-size: 11px; color: rgba(255,255,255,.35); margin-top: 8px; line-height: 1.8; }
+
+    /* ===== 追従CTA（スマホ） ===== */
+    .fixed-cta {
+      display: none;
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 950;
+      background: rgba(253,246,236,.96);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      border-top: 2px solid var(--accent);
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    }
+    .fixed-cta a {
+      display: block; text-align: center;
+      background: linear-gradient(180deg, #E8452F 0%, var(--accent) 55%, #A81010 100%);
+      color: #fff; text-decoration: none;
+      font-size: 16px; font-weight: 900;
+      padding: 14px; border-radius: 999px;
+      box-shadow: 0 5px 0 #7d0d08;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media screen and (max-width: 900px) {
+      .doc-wrap { grid-template-columns: 1fr; gap: 22px; text-align: center; padding: 28px 22px; }
+      .doc-photo { max-width: 190px; margin: 0 auto; }
+      .doc-bubble::before { left: 50%; top: -13px; margin-left: -10px;
+        border: none; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 13px solid var(--yellow); }
+      /* 2列でも段差は残す（1・3が上、2・4が下） */
+      .steps-grid { grid-template-columns: repeat(2, 1fr); }
+      .step:nth-child(1), .step:nth-child(3) { margin-top: 0; }
+      .step:nth-child(2), .step:nth-child(4) { margin-top: 32px; }
+    }
+
+    @media screen and (max-width: 768px) {
+      .sec { padding: 48px 0; }
+      .sp-only { display: inline; }
+
+      /* 画面が狭くなっても、文字は写真の上に乗せたまま。
+         人物の顔が隠れないよう、テキストは下寄せにして
+         下から立ち上がるグラデーションを敷いて読みやすさを確保する */
+      .fv-photo img { object-position: 76% 14%; }
+
+      .fv::after {
+        background: linear-gradient(0deg,
+          rgba(253,246,236,.98) 0%,
+          rgba(253,246,236,.96) 46%,
+          rgba(253,246,236,.60) 58%,
+          rgba(253,246,236,0) 76%);
+      }
+
+      .fv-inner {
+        /* 画面下に固定CTAがあるぶん、少し低めにして重なりを避ける */
+        min-height: min(88vh, 700px);
+        padding: 24px 20px 32px;
+        align-items: flex-end;
+      }
+
+      .fv-text { max-width: none; text-align: center; }
+      .fv-catch { text-shadow: 0 2px 8px rgba(255,253,248,.9); }
+      .btn-cta { width: 100%; padding: 16px 20px; }
+
+      .worry-box { padding: 26px 20px; }
+      body { padding-bottom: 78px; }
+      .fixed-cta { display: block; }
+    }
+
+    @media screen and (max-width: 480px) {
+      .container { padding: 0 16px; }
+
+      /* ボタンの文字が長いぶん、狭い画面ではロゴの説明文を省いて場所を空ける */
+      .logo-sub { display: none; }
+      .btn-nav { padding: 9px 16px 10px; font-size: 12px; }
+      .steps-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .step { padding: 14px 12px 16px; }
+      .step:nth-child(2), .step:nth-child(4) { margin-top: 22px; }
+      .footer-top { flex-direction: column; gap: 20px; }
+      .dot-band { gap: 18px; }
+    }
+
+    /* ===== キーボード操作時の可視性 ===== */
+    :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+    /* 濃い赤の上では赤い輪郭が見えないので白に切り替える */
+    #cta :focus-visible,
+    .fixed-cta :focus-visible,
+    footer :focus-visible { outline-color: #fff; }
+
+    /* ===== 動きを減らす設定への対応（WCAG 2.3.3 / 2.2.2）=====
+       常時ループしているボタンの上下動・光の走り・矢印の点滅を止める。
+       .anim は opacity:0 が初期値なので、必ず 1 に戻して表示を保証する。 */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .anim { opacity: 1 !important; }
+    }
+
+    /* ===== PRINT ===== */
+    @media print {
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      header, .fixed-cta { position: static !important; display: none !important; }
+      .anim { opacity: 1 !important; transform: none !important; }
+      .btn-cta, .arrow-down { animation: none !important; }
+      #doctor, #qa { break-before: page; }
+      @page { margin: 10mm; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== PASSWORD GATE ===== -->
+<style>
+  #pw-gate {
+    position: fixed; inset: 0; z-index: 1000; /* header(900)・追従CTA(950)より上 */
+    display: flex; align-items: center; justify-content: center;
+    background: #2E1010; font-family: 'Noto Sans JP', sans-serif;
+  }
+  #pw-gate.hidden { display: none; }
+  body.pw-locked { overflow: hidden; }
+  #pw-box {
+    background: #FFFDF8; padding: 40px 32px; border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    width: min(360px, 88vw); text-align: center;
+  }
+  #pw-box h1 { font-size: 20px; color: #6B1010; margin-bottom: 8px; }
+  #pw-box p { font-size: 13px; color: #7A7070; margin-bottom: 24px; }
+  #pw-input {
+    width: 100%; padding: 12px 14px; font-size: 16px;
+    border: 2px solid #E8D8D8; border-radius: 8px; outline: none;
+  }
+  #pw-input:focus { border-color: #CC2010; }
+  #pw-btn {
+    width: 100%; margin-top: 14px; padding: 12px; font-size: 15px; font-weight: 700;
+    color: #fff; background: #CC2010; border: none; border-radius: 8px; cursor: pointer;
+  }
+  #pw-btn:hover { opacity: .88; }
+  #pw-error { color: #CC2010; font-size: 13px; margin-top: 12px; min-height: 18px; }
+</style>
+<div id="pw-gate">
+  <div id="pw-box">
+    <h1>糖質疲労LAB</h1>
+    <p>閲覧にはパスワードが必要です</p>
+    <input id="pw-input" type="password" placeholder="パスワード" autocomplete="off" autofocus>
+    <button id="pw-btn" type="button">入る</button>
+    <div id="pw-error"></div>
+  </div>
+</div>
+<script>
+  (function () {
+    var PASSWORD = 'martinlab';
+    var KEY = 'tsl_pw_ok';
+    var gate = document.getElementById('pw-gate');
+    var input = document.getElementById('pw-input');
+    var btn = document.getElementById('pw-btn');
+    var err = document.getElementById('pw-error');
+    function unlock() { gate.classList.add('hidden'); document.body.classList.remove('pw-locked'); }
+    function check() {
+      if (input.value === PASSWORD) {
+        try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+        unlock();
+      } else { err.textContent = 'パスワードが違います'; input.value = ''; input.focus(); }
+    }
+    document.body.classList.add('pw-locked');
+    var ok = false;
+    try { ok = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+    if (ok) { unlock(); }
+    btn.addEventListener('click', check);
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') check(); });
+  })();
+</script>
+<!-- ===== /PASSWORD GATE ===== -->
+
+<!-- ===== HEADER ===== -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-en">糖質疲労LAB</span>
+      <span class="logo-sub">食後の眠気・だるさを考えるサイト</span>
+    </div>
+    <a href="mockup_ver6_check.html" class="btn-nav">糖質疲労チェック</a>
+  </div>
+</header>
+
+<!-- ===== ファーストビュー ===== -->
+<section class="fv">
+  <div class="fv-photo">
+    <img src="sozai/hero_v2.jpeg" alt="オフィスで眠気に襲われるビジネスパーソン">
+  </div>
+
+  <div class="fv-inner">
+    <div class="fv-text">
+      <p class="fv-sub">がんばっているのに、午後になると頭が働かない。</p>
+      <h1 class="fv-catch">
+        ランチ後の<br>眠気やだるさ…<br>
+        それって<span class="kw">糖質疲労</span><span class="qm">！？</span>
+      </h1>
+      <p class="fv-desc">
+        年のせい、寝不足のせい。そう片づける前に。<br>
+        原因は、お昼に食べた<b>「あれ」</b>かもしれません。
+      </p>
+      <a href="mockup_ver6_check.html" class="btn-cta">
+        <span class="btn-cta-sm">かんたん10問・無料</span>
+        <span class="btn-cta-lg">1分で糖質疲労チェック</span>
+      </a>
+      <p class="cta-under">
+        <svg class="tri" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg>
+        質問に答えるだけで、あなたの糖質疲労度が分かります
+      </p>
+    </div>
+  </div>
+
+  <div class="fv-strip">その眠気の正体は、気合いではなく「血糖値」。</div>
+</section>
+
+<!-- ===== 悩みチェック ===== -->
+<section class="sec" id="worry">
+  <div class="container">
+    <h2 class="sec-h">こんなこと、<br class="sp-only">ありませんか？</h2>
+
+    <div class="worry-box anim">
+      <ul class="worry-list">
+        <li class="worry-item"><span class="worry-check"></span><span>ランチのあと、<span class="marker">どうしようもなく眠くなる</span></span></li>
+        <li class="worry-item"><span class="worry-check"></span><span>午後の会議や作業で、集中力が続かない</span></li>
+        <li class="worry-item"><span class="worry-check"></span><span>しっかり寝ているのに、<span class="marker">だるさが抜けない</span></span></li>
+        <li class="worry-item"><span class="worry-check"></span><span>食べたばかりなのに、また甘いものが欲しくなる</span></li>
+        <li class="worry-item"><span class="worry-check"></span><span>健康診断で、血糖値のことを言われたことがある</span></li>
+      </ul>
+
+      <p class="worry-after">ひとつでも当てはまったら</p>
+
+      <p class="signal">
+        <span class="signal-lamps" aria-hidden="true">
+          <span class="lamp lamp--off"></span>
+          <span class="lamp lamp--on"></span>
+          <span class="lamp lamp--off"></span>
+        </span>
+        <span class="signal-text">黄色信号</span>です。
+      </p>
+
+      <div class="arrow-down"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 糖質疲労とは ===== -->
+<section class="sec" id="about">
+  <div class="container">
+    <h2 class="sec-h">その不調、<br class="sp-only"><span class="marker red">「糖質疲労」</span>かもしれません</h2>
+
+    <p class="about-statement">
+      原因は、食事による<br>
+      <span class="red">血糖値の“乱高下”。</span>
+    </p>
+
+    <div class="about-card">
+      <p>
+        ごはんやパンをしっかり食べると、<b class="red">血糖値がぐんと上がります</b>。
+        すると体はあわてて下げにかかり、今度は<b class="red">急降下</b>。
+        このジェットコースターのような上下動が、食後の強い眠気やだるさ、集中力の低下を連れてきます。
+        これが「糖質疲労」です。
+      </p>
+      <p>
+        やっかいなのは、本人が気づきにくいこと。
+        「年のせい」「寝不足のせい」で<span class="nb">片づけられがちです</span>。
+        でも<span class="nb">1日3回</span>、食事のたびに同じことが起きています。
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== 図解 ===== -->
+<section class="sec" id="graph">
+  <div class="container">
+    <h2 class="sec-h">グラフで見る<br class="sp-only">「糖質疲労」のしくみ</h2>
+
+    <p class="graph-lead">昼食のあと、<span class="marker">ここまで上がる</span>！</p>
+
+    <div class="graph-frame anim">
+      <img src="sozai/graph/血糖値スパイクグラフ_OL.svg" alt="食後の血糖値スパイクを示すグラフ">
+    </div>
+    <p class="graph-caption">※ イメージ図。血糖値の変動には個人差があります。</p>
+
+    <div class="steps-grid">
+      <div class="step anim">
+        <img src="sozai/糖質疲労/1.png" alt="食後の血糖値スパイク">
+        <h3 class="step-title"><span class="step-num">1</span>食後の血糖値スパイク！</h3>
+      </div>
+      <div class="step anim d1">
+        <img src="sozai/糖質疲労/2.png" alt="そして急降下">
+        <h3 class="step-title"><span class="step-num">2</span>そして…急降下！</h3>
+      </div>
+      <div class="step anim d2">
+        <img src="sozai/糖質疲労/3.png" alt="食後の眠気と疲労感">
+        <h3 class="step-title"><span class="step-num">3</span>食後の眠気と疲労感</h3>
+      </div>
+      <div class="step anim d3">
+        <img src="sozai/糖質疲労/4.png" alt="老化・病気のリスク増">
+        <h3 class="step-title"><span class="step-num">4</span>老化・病気のリスク増</h3>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="dot-band">
+  <div class="dot-group"><div class="dot sm"></div><div class="dot"></div><div class="dot lg"></div></div>
+  <div class="dot-group"><div class="dot lg"></div><div class="dot"></div><div class="dot sm"></div></div>
+  <div class="dot-group"><div class="dot"></div><div class="dot lg"></div><div class="dot"></div></div>
+  <div class="dot-group"><div class="dot sm"></div><div class="dot"></div><div class="dot lg"></div></div>
+</div>
+
+<!-- ===== 監修医 ===== -->
+<section class="sec" id="doctor">
+  <div class="container">
+    <h2 class="sec-h">「糖質疲労」を提唱する<br>糖尿病専門医</h2>
+
+    <div class="doc-wrap anim">
+      <div class="doc-photo">
+        <img src="sozai/yamadasatoru.jpg" alt="山田悟先生">
+      </div>
+      <div class="doc-text">
+        <p class="doc-role">北里研究所病院 糖尿病センター長<br>一般社団法人 食・楽・健康協会 代表理事</p>
+        <p class="doc-name">山田 悟<span>やまだ さとる</span></p>
+        <div class="doc-bubble">
+          食後の眠気やだるさを「気のせい」で済ませてしまう方は、本当に多いです。
+          でもそれは、体からのサイン。血糖値の急な上がり下がりは、その日の集中力を奪うだけでなく、
+          何年もかけて体にも効いてきます。まずは、自分が何をどう食べているかを知るところから。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section id="cta">
+  <div class="container">
+    <p class="cta-catch">あなたは大丈夫？<br><span class="hl">今すぐ1分でセルフチェック</span></p>
+    <p class="cta-sub">10個の質問に答えるだけ。今のあなたの「糖質疲労度」が分かります。</p>
+
+    <a href="mockup_ver6_check.html" class="btn-cta">
+      <span class="btn-cta-sm">登録不要・無料</span>
+      <span class="btn-cta-lg">糖質疲労チェックをはじめる</span>
+    </a>
+
+    <p class="cta-note">※ 本チェックは医学的な診断ではありません。生活習慣を振り返るための簡易チェックです。</p>
+  </div>
+</section>
+
+<!-- ===== Q&A ===== -->
+<section class="sec" id="qa">
+  <div class="container">
+    <h2 class="sec-h">よくあるご質問</h2>
+
+    <div class="qa-list">
+      <details class="qa">
+        <summary>「糖質疲労」は病気ですか？</summary>
+        <div class="qa-a">病名ではありません。食事による血糖値の急上昇・急降下にともなって起こる、食後の眠気やだるさなどの不調をわかりやすく表した言葉です。</div>
+      </details>
+
+      <details class="qa">
+        <summary>若い人でも関係ありますか？</summary>
+        <div class="qa-a">年齢は関係ありません。20代でも30代でも、何をどれだけ食べたかで食後の血糖値は大きく動きます。</div>
+      </details>
+
+      <details class="qa">
+        <summary>甘いものを控えれば大丈夫ですか？</summary>
+        <div class="qa-a">お菓子や甘い飲み物だけの話ではありません。ごはん・パン・麺類といった主食の量や食べる順番も関係します。むしろ毎日3回食べる主食のほうが、影響は大きくなります。</div>
+      </details>
+
+      <details class="qa">
+        <summary>チェックの結果は診断になりますか？</summary>
+        <div class="qa-a">いいえ。本チェックは医学的な診断ではなく、生活習慣を振り返っていただくための簡易的なものです。気になる症状が続く場合は医療機関にご相談ください。</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-logo">
+        <span class="footer-logo-en">糖質疲労LAB</span>
+      </div>
+      <nav class="footer-nav">
+        <a href="#worry">こんなお悩み</a>
+        <a href="#about">糖質疲労とは</a>
+        <a href="#graph">しくみ</a>
+        <a href="#doctor">監修医</a>
+        <a href="mockup_ver6_check.html">糖質疲労チェック</a>
+      </nav>
+    </div>
+    <p class="footer-copy">© 2026 SARAYA Co., Ltd. All Rights Reserved.</p>
+    <p class="footer-disclaimer">
+      本サイトの情報は健康に関する一般的な情報提供を目的としたものであり、医薬品的な効果効能を示すものではありません。<br>
+      気になる症状が続く場合は医療機関にご相談ください。
+    </p>
+  </div>
+</footer>
+
+<!-- ===== 追従CTA（スマホ） ===== -->
+<div class="fixed-cta">
+  <a href="mockup_ver6_check.html">
+    <svg class="tri" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg>
+    1分で糖質疲労チェック
+  </a>
+</div>
+
+<script>
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) e.target.classList.add('active'); });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.anim').forEach(function (el) { io.observe(el); });
+</script>
+
+<script>
+  // ===== BudouX：日本語を文節単位で改行させる =====
+  // BLOCK: 要素の中身をまるごと <budoux-ja> で包む（通常のテキストブロック）
+  // INLINE: 直下のテキストノードだけを包む（flexレイアウトを壊さないため）
+  (function () {
+    var BLOCK = [
+      '.fv-sub', '.fv-catch', '.fv-desc', '.fv-strip',
+      '.sec-h', '.sec-lead',
+      '.worry-item > span:last-child', '.worry-after',
+      '.about-statement', '.about-card p',
+      '.graph-caption',
+      '.doc-role', '.doc-bubble',
+      '.cta-catch', '.cta-sub', '.cta-note', '.cta-under',
+      '.qa-a', '.footer-disclaimer'
+    ].join(',');
+
+    // 幅の狭いラベル（.step-title など）は keep-all にすると
+    // 「！」だけが次行に落ちるので、あえてブラウザ標準の折り返しに任せる
+    var INLINE = ['.qa summary'].join(',');
+
+    // 中身を <budoux-ja> に入れてDOMに挿すと、その瞬間に改行位置が入る（同期処理）。
+    // 直後に中身を取り出して <budoux-ja> 自体は捨てる。
+    // ※ 残したままだと、要素がテキストの変更を監視していて、後段の stickyFix の
+    //   結果を自動で元に戻してしまうため。
+    //   外したあとは .jp-break（keep-all）で「入れた位置だけで改行」させる。
+    function detach(b, parent) {
+      while (b.firstChild) { parent.insertBefore(b.firstChild, b); }
+      parent.removeChild(b);
+    }
+
+    // keep-all は「改行位置が入った時だけ」付ける。
+    // CDNが読めなかった場合に付けてしまうと、どこでも改行できなくなり文字があふれるため。
+    function markIfBroken(el) {
+      el.normalize();
+      if (el.textContent.indexOf(ZW) >= 0) { el.classList.add('jp-break'); }
+    }
+
+    function wrapChildren(el) {
+      var b = document.createElement('budoux-ja');
+      while (el.firstChild) { b.appendChild(el.firstChild); }
+      el.appendChild(b);
+      detach(b, el);
+      markIfBroken(el);
+    }
+
+    function wrapTextNodes(el) {
+      Array.prototype.slice.call(el.childNodes).forEach(function (n) {
+        if (n.nodeType !== 3 || !n.textContent.trim()) return;
+        var next = n.nextSibling;
+        var b = document.createElement('budoux-ja');
+        b.appendChild(n);
+        el.insertBefore(b, next);
+        detach(b, el);
+      });
+      markIfBroken(el);
+    }
+
+    // ----- 行末に取り残したくない語 -----
+    // BudouXは文節では正しく切るが、「この」「その」「という」のような
+    // 短い語が行末に残ると読みにくい。そこで、その直後（と語中）の
+    // 改行位置＝BudouXが入れたZWSPを削って、後ろの語とひとまとまりにする。
+    // 語を増やしたいときはこの配列に足すだけでよい。
+    var ZW = String.fromCharCode(0x200B); // BudouXが入れる改行位置（ゼロ幅スペース）
+    var STICKY = [
+      [new RegExp('(この|その|あの|どの)' + ZW, 'g'), '$1'],   // 指示連体詞
+      [new RegExp('と' + ZW + '?いう' + ZW, 'g'), 'という'],   // 「という」は と|いう と分割される
+      [new RegExp('と' + ZW + '?いった' + ZW, 'g'), 'といった'],
+      [new RegExp('(いわゆる|あらゆる|さまざまな|様々な|ちょっとした)' + ZW, 'g'), '$1']
+    ];
+
+    // ----- 語の途中で切られてしまう語 -----
+    // BudouXの分割ミスで「だる|さ」「が|まん」のように語中で改行される語。
+    // 語の中の改行位置をすべて取り除いて1語に戻す。
+    // 気になる切れ方を見つけたら、この配列に語を足すだけでよい。
+    var NOSPLIT = [
+      'だるさ', 'しくみ', 'がまん', 'ひとまず', 'とはいえ',
+      '当てはまっ', '気になる', 'よくある', '毎日', '片づけられがち'
+    ];
+
+    function joinWords(s) {
+      NOSPLIT.forEach(function (w) {
+        s = s.replace(new RegExp(w.split('').join(ZW + '?'), 'g'), w);
+      });
+      return s;
+    }
+
+    function stickyFix(root) {
+      var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      var nodes = [], n;
+      while ((n = walker.nextNode())) { nodes.push(n); }
+      nodes.forEach(function (t) {
+        if (t.data.indexOf(ZW) < 0) return;
+        var s = joinWords(t.data);
+        STICKY.forEach(function (r) { s = s.replace(r[0], r[1]); });
+        // 「」で囲んだ短い語（10文字以内）は、その中で改行しない
+        s = s.replace(/「([^」]{1,14})」/g, function (m, inner) {
+          var plain = inner.split(ZW).join('');
+          return plain.length <= 10 ? '「' + plain + '」' : m;
+        });
+        if (s !== t.data) { t.data = s; }
+      });
+    }
+
+    function run() {
+      document.querySelectorAll(BLOCK).forEach(wrapChildren);
+      document.querySelectorAll(INLINE).forEach(wrapTextNodes);
+      stickyFix(document.body); // BudouXは同期処理なので、包んだ直後に実行してよい
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', run);
+    } else {
+      run();
+    }
+  })();
+</script>
+
+</body>
+</html>

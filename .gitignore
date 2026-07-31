@@ -4,5 +4,12 @@
 # 公開するもの
 !.gitignore
 !.nojekyll
-!mockup_ver5.html
 !sozai
+
+# 旧版（共有済みのURLが生きているため残す）
+!mockup_ver5.html
+
+# 現行のモックアップ（TOP → チェック → 結果）
+!mockup_ver6.html
+!mockup_ver6_check.html
+!mockup_ver6_result.html

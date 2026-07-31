@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 先方確認用のモックアップ。検索結果に載らないようにする -->
+  <meta name="robots" content="noindex, nofollow">
+  <title>1分で分かる糖質疲労チェック｜糖質疲労LAB</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- 日本語の改行位置を文節単位にする（Google製 BudouX） -->
+  <script src="https://unpkg.com/budoux@0.8.4/bundle/budoux-ja.min.js" defer></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent:     #CC2010;
+      --navy:       #6B1010;
+      --orange:     #E87820;
+      --yellow:     #FFD21A;
+      --cream:      #FDF6EC;
+      --offwhite:   #F8F2F2;
+      --gray:       #7A7070;
+      --gray-light: #E8D8D8;
+      --line:       #DDC9B8;   /* カードの罫線（下地に合わせた暖色のヘアライン） */
+      --white:      #FFFDF8;
+      --ink:        #2E1010;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      color: var(--ink);
+      background: var(--cream);
+      font-size: 16px;
+      line-height: 1.8;
+      word-break: auto-phrase;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 日本語の改行コントロール（BudouX + text-wrap） */
+    /* BudouXが入れた位置「だけ」で改行させる */
+    .jp-break { word-break: keep-all; overflow-wrap: break-word; }
+    h1, h2, h3, .check-title, .q-text { text-wrap: balance; }
+    p, li { text-wrap: pretty; }
+
+    /* ===== HEADER ===== */
+    header {
+      background: var(--cream);
+      border-bottom: 3px solid var(--accent);
+      padding: 10px 0;
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-en {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-back-top {
+      font-size: 13px;
+      color: var(--gray);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .btn-back-top:hover { color: var(--accent); }
+
+    /* ===== MAIN ===== */
+    main {
+      flex: 1;
+      padding: 40px 0 64px;
+    }
+
+    .container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+    .check-head { text-align: center; margin-bottom: 28px; }
+
+    .check-label {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      padding: 5px 16px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+
+    .check-title {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 900;
+      line-height: 1.4;
+      color: var(--ink);
+    }
+
+    .check-title .marker {
+      color: var(--accent);
+      background: linear-gradient(transparent 58%, #ffe14d 58%, #ffd21a 100%);
+      padding: 0 0.1em;
+    }
+
+    .check-sub { font-size: 14px; color: var(--gray); margin-top: 8px; }
+
+    /* ===== PROGRESS ===== */
+    .progress-wrap { margin-bottom: 20px; }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 13px;
+      color: var(--gray);
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .progress-meta .cur {
+      font-family: 'Inter', sans-serif;
+      font-size: 22px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .progress-bar {
+      height: 10px;
+      background: var(--gray-light);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--orange));
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    /* ===== QUESTION CARD ===== */
+    .q-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 40px 32px;
+      min-height: 340px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    @keyframes qIn {
+      from { opacity: 0; transform: translateX(24px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .q-inner { animation: qIn 0.35s ease-out; }
+
+    .q-num {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .q-text {
+      font-size: clamp(19px, 2.8vw, 26px);
+      font-weight: 700;
+      line-height: 1.6;
+      text-align: center;
+      margin-bottom: 32px;
+      color: var(--ink);
+    }
+
+    .q-choices { display: grid; gap: 12px; }
+
+    .q-choice {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      background: var(--offwhite);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 22px;
+      font-family: inherit;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+    }
+
+    .q-choice:hover {
+      border-color: var(--accent);
+      background: var(--white);
+    }
+
+    .q-choice .mark {
+      flex-shrink: 0;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--white);
+      border: 1px solid var(--line);
+      font-size: 17px;
+      transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+    }
+
+    .q-choice:hover .mark { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .q-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .btn-prev {
+      background: none;
+      border: none;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gray);
+      cursor: pointer;
+      padding: 8px 4px;
+      transition: color 0.2s;
+    }
+    .btn-prev:hover { color: var(--accent); }
+    .btn-prev[disabled] { opacity: 0.3; cursor: default; }
+
+    .q-note { font-size: 12px; color: var(--gray); }
+
+    /* ===== SENDING ===== */
+    .sending {
+      text-align: center;
+      padding: 40px 0;
+      display: none;
+    }
+    .sending.on { display: block; }
+
+    .spinner {
+      width: 54px; height: 54px;
+      border: 5px solid var(--gray-light);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .sending p { font-size: 17px; font-weight: 700; color: var(--navy); }
+
+    .disclaimer {
+      font-size: 12px;
+      color: var(--gray);
+      text-align: center;
+      margin-top: 28px;
+      line-height: 1.8;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--navy);
+      color: rgba(255,255,255,0.5);
+      padding: 24px 0;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    /* ===== キーボード操作時の可視性 ===== */
+    :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+    footer :focus-visible { outline-color: #fff; }
+
+    /* ===== 動きを減らす設定への対応（WCAG 2.3.3）=====
+       設問の切り替わりアニメと判定中のスピナーを止める */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      .container { padding: 0 16px; }
+      .q-card { padding: 28px 18px; border-radius: 18px; }
+      .q-choice { font-size: 15px; padding: 14px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== PASSWORD GATE ===== -->
+<style>
+  #pw-gate {
+    position: fixed; inset: 0; z-index: 1000; /* header(900)・追従CTA(950)より上 */
+    display: flex; align-items: center; justify-content: center;
+    background: #2E1010;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  #pw-gate.hidden { display: none; }
+  body.pw-locked { overflow: hidden; }
+  #pw-box {
+    background: #FFFDF8; padding: 40px 32px; border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    width: min(360px, 88vw); text-align: center;
+  }
+  #pw-box h1 { font-size: 20px; color: #6B1010; margin-bottom: 8px; }
+  #pw-box p { font-size: 13px; color: #7A7070; margin-bottom: 24px; }
+  #pw-input {
+    width: 100%; padding: 12px 14px; font-size: 16px;
+    border: 2px solid #E8D8D8; border-radius: 8px; outline: none;
+  }
+  #pw-input:focus { border-color: #CC2010; }
+  #pw-btn {
+    width: 100%; margin-top: 14px; padding: 12px; font-size: 15px; font-weight: 700;
+    color: #fff; background: #CC2010; border: none; border-radius: 8px; cursor: pointer;
+  }
+  #pw-btn:hover { opacity: .88; }
+  #pw-error { color: #CC2010; font-size: 13px; margin-top: 12px; min-height: 18px; }
+</style>
+<div id="pw-gate">
+  <div id="pw-box">
+    <h1>糖質疲労LAB</h1>
+    <p>閲覧にはパスワードが必要です</p>
+    <input id="pw-input" type="password" placeholder="パスワード" autocomplete="off" autofocus>
+    <button id="pw-btn" type="button">入る</button>
+    <div id="pw-error"></div>
+  </div>
+</div>
+<script>
+  (function () {
+    var PASSWORD = 'martinlab';
+    var KEY = 'tsl_pw_ok';
+    var gate = document.getElementById('pw-gate');
+    var input = document.getElementById('pw-input');
+    var btn = document.getElementById('pw-btn');
+    var err = document.getElementById('pw-error');
+    function unlock() { gate.classList.add('hidden'); document.body.classList.remove('pw-locked'); }
+    function check() {
+      if (input.value === PASSWORD) {
+        try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+        unlock();
+      } else { err.textContent = 'パスワードが違います'; input.value = ''; input.focus(); }
+    }
+    document.body.classList.add('pw-locked');
+    var ok = false;
+    try { ok = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+    if (ok) { unlock(); }
+    btn.addEventListener('click', check);
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') check(); });
+  })();
+</script>
+<!-- ===== /PASSWORD GATE ===== -->
+
+<header>
+  <div class="header-inner">
+    <a href="mockup_ver6.html" class="logo-en">糖質疲労LAB</a>
+    <a href="mockup_ver6.html" class="btn-back-top">トップにもどる</a>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <div class="check-head">
+      <span class="check-label">1 MIN CHECK</span>
+      <h1 class="check-title">あなたの<span class="marker">糖質疲労度</span>チェック</h1>
+      <p class="check-sub">直感でOK。10個の質問に答えてください。</p>
+    </div>
+
+    <div id="quiz">
+      <div class="progress-wrap">
+        <div class="progress-meta">
+          <span><span class="cur" id="p-cur">1</span> / 10 問</span>
+          <span id="p-pct">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="p-fill"></div></div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-inner" id="q-inner">
+          <p class="q-num" id="q-num">QUESTION 1</p>
+          <p class="q-text" id="q-text">質問文</p>
+          <div class="q-choices" id="q-choices"></div>
+        </div>
+      </div>
+
+      <div class="q-nav">
+        <button class="btn-prev" id="btn-prev" type="button" disabled>前の質問へ</button>
+        <span class="q-note">選ぶと次の質問へ進みます</span>
+      </div>
+    </div>
+
+    <div class="sending" id="sending">
+      <div class="spinner"></div>
+      <p>あなたの糖質疲労度を判定中…</p>
+    </div>
+
+    <p class="disclaimer">
+      ※ 本チェックは医学的な診断ではありません。ご自身の生活習慣を振り返るための簡易チェックです。<br>
+      気になる症状が続く場合は医療機関にご相談ください。
+    </p>
+
+  </div>
+</main>
+
+<footer>© 2026 SARAYA Co., Ltd. All Rights Reserved.</footer>
+
+<script>
+(function () {
+  var QUESTIONS = [
+    'ランチのあと、強い眠気に襲われることがある',
+    '食後1〜2時間で、だるさや集中力の低下を感じる',
+    '食事のあと、しばらくするとまた甘いものが欲しくなる',
+    'ごはん・パン・麺類が好きで、毎食しっかり食べている',
+    '甘い飲み物（清涼飲料・加糖コーヒーなど）をよく飲む',
+    '食べるのが速く、食事は10分程度で終わることが多い',
+    '空腹になるとイライラしたり、集中できなくなる',
+    '運動をする習慣がほとんどない',
+    '健康診断で血糖値・HbA1cについて指摘されたことがある',
+    '最近、お腹まわりが気になってきた'
+  ];
+
+  var CHOICES = [
+    { label: 'はい',       mark: '◎', score: 2 },
+    { label: 'ときどき',   mark: '○', score: 1 },
+    { label: 'いいえ',     mark: '×', score: 0 }
+  ];
+
+  var MAX = QUESTIONS.length * 2;
+
+  var idx = 0;
+  var answers = new Array(QUESTIONS.length).fill(null);
+
+  var elNum     = document.getElementById('q-num');
+  var elText    = document.getElementById('q-text');
+  var elChoices = document.getElementById('q-choices');
+  var elInner   = document.getElementById('q-inner');
+  var elCur     = document.getElementById('p-cur');
+  var elPct     = document.getElementById('p-pct');
+  var elFill    = document.getElementById('p-fill');
+  var elPrev    = document.getElementById('btn-prev');
+  var elQuiz    = document.getElementById('quiz');
+  var elSending = document.getElementById('sending');
+
+  // ---- BudouX：中身をまるごと <budoux-ja> で包み、文節単位で改行させる ----
+  // さらに「この」「その」「という」など、行末に取り残したくない語の直後の
+  // 改行位置（BudouXが入れるゼロ幅スペース）を削って、後ろの語とくっつける。
+  var ZW = String.fromCharCode(0x200B);
+  var STICKY = [
+    [new RegExp('(この|その|あの|どの)' + ZW, 'g'), '$1'],
+    [new RegExp('と' + ZW + '?いう' + ZW, 'g'), 'という'],
+    [new RegExp('と' + ZW + '?いった' + ZW, 'g'), 'といった'],
+    [new RegExp('(いわゆる|あらゆる|さまざまな|様々な|ちょっとした)' + ZW, 'g'), '$1']
+  ];
+
+  // BudouXの分割ミスで「だる|さ」のように語中で改行される語。
+  // 語中の改行位置をすべて取り除いて1語に戻す。気になる切れ方が出たらここに足す。
+  var NOSPLIT = [
+    'だるさ', 'しくみ', 'がまん', 'ひとまず', 'とはいえ',
+    '当てはまっ', '気になる', 'よくある', '毎日', '片づけられがち'
+  ];
+
+  function joinWords(s) {
+    NOSPLIT.forEach(function (w) {
+      s = s.replace(new RegExp(w.split('').join(ZW + '?'), 'g'), w);
+    });
+    return s;
+  }
+
+  function stickyFix(root) {
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    var nodes = [], n;
+    while ((n = walker.nextNode())) { nodes.push(n); }
+    nodes.forEach(function (t) {
+      if (t.data.indexOf(ZW) < 0) return;
+      var s = joinWords(t.data);
+      STICKY.forEach(function (r) { s = s.replace(r[0], r[1]); });
+      // 「」で囲んだ短い語（10文字以内）は、その中で改行しない
+      s = s.replace(/「([^」]{1,14})」/g, function (m, inner) {
+        var plain = inner.split(ZW).join('');
+        return plain.length <= 10 ? '「' + plain + '」' : m;
+      });
+      if (s !== t.data) { t.data = s; }
+    });
+  }
+
+  // 中身を <budoux-ja> に入れてからDOMに挿す → その瞬間に改行位置が入る（同期）。
+  // 直後に中身を取り出して <budoux-ja> は捨てる。
+  // ※ 残したままだと、要素がテキストの変更を監視していて stickyFix の結果を
+  //   自動で元に戻してしまうため。外したあとは .jp-break で改行位置を固定する。
+  function bd(el) {
+    if (!el) return;
+    var b = document.createElement('budoux-ja');
+    while (el.firstChild) { b.appendChild(el.firstChild); }
+    el.appendChild(b);
+    while (b.firstChild) { el.insertBefore(b.firstChild, b); }
+    el.removeChild(b);
+    el.normalize();
+    // keep-all は「改行位置が入った時だけ」付ける。
+    // CDNが読めなかった場合に付けると、どこでも改行できず文字があふれるため。
+    if (el.textContent.indexOf(ZW) >= 0) { el.classList.add('jp-break'); }
+    stickyFix(el);
+  }
+
+  function render() {
+    elNum.textContent = 'QUESTION ' + (idx + 1);
+    elText.textContent = QUESTIONS[idx];
+    bd(elText); // 質問文は毎回入れ替わるので、描画のたびに適用する
+
+    elChoices.innerHTML = '';
+    CHOICES.forEach(function (c, i) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'q-choice';
+      btn.innerHTML = '<span class="mark">' + c.mark + '</span><span>' + c.label + '</span>';
+      btn.addEventListener('click', function () { answer(c.score); });
+      elChoices.appendChild(btn);
+    });
+
+    elCur.textContent = idx + 1;
+    var pct = Math.round(idx / QUESTIONS.length * 100);
+    elPct.textContent = pct + '%';
+    elFill.style.width = pct + '%';
+    elPrev.disabled = idx === 0;
+
+    // 再アニメーション
+    elInner.style.animation = 'none';
+    void elInner.offsetWidth;
+    elInner.style.animation = '';
+  }
+
+  function answer(score) {
+    answers[idx] = score;
+    if (idx < QUESTIONS.length - 1) {
+      idx++;
+      render();
+    } else {
+      finish();
+    }
+  }
+
+  function finish() {
+    elFill.style.width = '100%';
+    elPct.textContent = '100%';
+
+    var total = answers.reduce(function (a, b) { return a + (b || 0); }, 0);
+    try {
+      sessionStorage.setItem('tsl_score', String(total));
+      sessionStorage.setItem('tsl_answers', answers.join(','));
+    } catch (e) {}
+
+    elQuiz.style.display = 'none';
+    elSending.classList.add('on');
+
+    setTimeout(function () {
+      location.href = 'mockup_ver6_result.html?s=' + total + '&m=' + MAX;
+    }, 1400);
+  }
+
+  elPrev.addEventListener('click', function () {
+    if (idx > 0) { idx--; render(); }
+  });
+
+  // BudouXはdeferで読み込むので、DOMContentLoadedまで待たないと
+  // <budoux-ja> がまだ定義されておらず、改行位置が入らない
+  function start() {
+    document.querySelectorAll('.check-title, .check-sub, .sending p, .disclaimer').forEach(bd);
+    render();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();
+</script>
+
+</body>
+</html>
