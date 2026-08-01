@@ -381,54 +381,6 @@
 
     .link-card:hover .link-card-cta { transform: translateY(2px); box-shadow: 0 3px 0 #7d0d08, 0 6px 14px rgba(204,32,16,0.25); }
 
-    /* レシピ帯 */
-    .recipe-strip {
-      background: var(--green);
-      padding: 18px 0;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .recipe-row {
-      display: flex;
-      gap: 16px;
-      width: max-content;
-      animation: slideLeft 90s linear infinite;
-    }
-
-    /* WCAG 2.2.2：5秒以上動き続けるものには停止手段が要る。
-       ホバー/フォーカスに加えて、押せる停止ボタンも用意する */
-    .recipe-strip:hover .recipe-row,
-    .recipe-strip:focus-within .recipe-row { animation-play-state: paused; }
-    .recipe-row.is-paused { animation-play-state: paused !important; }
-
-    .recipe-pause {
-      position: absolute;
-      right: 14px; bottom: 14px;
-      width: 38px; height: 38px;
-      border-radius: 50%;
-      border: 2px solid rgba(255,255,255,.85);
-      background: rgba(0,0,0,.35);
-      color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .recipe-pause:hover { background: rgba(0,0,0,.6); }
-    .recipe-pause svg { width: 15px; height: 15px; display: block; }
-
-    @keyframes slideLeft {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-
-    .recipe-item {
-      flex: 0 0 220px;
-      aspect-ratio: 1200/800;
-      overflow: hidden;
-      border-radius: 6px;
-    }
-    .recipe-item img { width: 100%; height: 100%; object-fit: cover; }
 
     /* ===== FOOTER ===== */
     footer {
@@ -472,7 +424,6 @@
       .gauge-wrap { width: 200px; }
       .gauge-score { font-size: 52px; }
       .scale-step { font-size: 11px; padding: 8px 4px; }
-      .recipe-item { flex: 0 0 150px; }
       .footer-top { flex-direction: column; gap: 20px; }
     }
 
@@ -482,7 +433,6 @@
       outline-offset: 3px;
       border-radius: 4px;
     }
-    .recipe-strip :focus-visible,
     footer :focus-visible { outline-color: #fff; }
 
     /* ===== 動きを減らす設定への対応（WCAG 2.3.3 / 2.2.2）===== */
@@ -495,7 +445,6 @@
         transition-duration: 0.01ms !important;
       }
 
-      .recipe-row { animation: none !important; }
     }
 
     @media print {
@@ -695,16 +644,6 @@
   </div>
 </section>
 
-<!-- レシピ帯 -->
-<div class="recipe-strip">
-  <div class="recipe-row" id="recipe-row"></div>
-  <button class="recipe-pause" id="recipe-pause" type="button" aria-label="レシピ画像の動きを止める">
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <rect x="6" y="4" width="4" height="16" rx="1"></rect>
-      <rect x="14" y="4" width="4" height="16" rx="1"></rect>
-    </svg>
-  </button>
-</div>
 
 <!-- FOOTER -->
 <footer>
@@ -715,8 +654,8 @@
       </div>
       <nav class="footer-nav">
         <a href="mockup_ver6.html">トップ</a>
-        <a href="mockup_ver6.html#section-about">糖質疲労とは</a>
-        <a href="mockup_ver6.html#section-doctor">山田悟先生</a>
+        <a href="mockup_ver6.html#about">糖質疲労とは</a>
+        <a href="mockup_ver6.html#doctor">提唱者</a>
         <a href="mockup_ver6_check.html">糖質疲労チェック</a>
       </nav>
     </div>
@@ -806,32 +745,6 @@
     setTimeout(function () { requestAnimationFrame(step); }, 250);
   }
 
-  // ---- レシピ帯（画像を並べて無限ループ） ----
-  var nums = ['02','05','07','11','14','18','21','25','28','31','33','04'];
-  var row = document.getElementById('recipe-row');
-  var html = nums.map(function (n) {
-    return '<div class="recipe-item"><img src="sozai/レシピ/' + n + '.png" alt="ラカントレシピ" loading="lazy"></div>';
-  }).join('');
-  row.innerHTML = html + html; // 2周分でシームレスループ
-
-  // ---- レシピ帯の停止ボタン（WCAG 2.2.2）----
-  var PAUSE_ICON = '<rect x="6" y="4" width="4" height="16" rx="1"></rect>' +
-                   '<rect x="14" y="4" width="4" height="16" rx="1"></rect>';
-  var PLAY_ICON  = '<path d="M8 5l12 7-12 7z"></path>';
-  var pauseBtn = document.getElementById('recipe-pause');
-
-  pauseBtn.addEventListener('click', function () {
-    var paused = row.classList.toggle('is-paused');
-    pauseBtn.querySelector('svg').innerHTML = paused ? PLAY_ICON : PAUSE_ICON;
-    pauseBtn.setAttribute('aria-label', paused ? 'レシピ画像を動かす' : 'レシピ画像の動きを止める');
-  });
-
-  // 「動きを減らす」設定の端末では、最初から止めておく
-  if (reduce) {
-    row.classList.add('is-paused');
-    pauseBtn.querySelector('svg').innerHTML = PLAY_ICON;
-    pauseBtn.setAttribute('aria-label', 'レシピ画像を動かす');
-  }
 
   // ---- BudouX：日本語を文節単位で改行させる ----
   // 判定結果の文言はJSで差し込むので、差し込んだ後にまとめて適用する。
