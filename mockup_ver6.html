@@ -397,18 +397,15 @@
     .graph-frame img { display: block; width: 100%; height: auto; }
     .graph-caption { font-size: 12px; color: var(--gray); text-align: right; margin-top: 8px; }
 
-    /* 等幅4列をやめ、1→4と進むほど下に落ちる階段状に。
-       「上がって→落ちて→疲れて→リスク」という中身の流れと形を一致させる */
+    /* PCは横一列。ただし完全な等幅4列はAIテンプレートの典型形なので、
+       見出しの行数に合わせて列幅に差をつけ、均一さを崩している */
     .steps-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      display: grid;
+      grid-template-columns: 1.12fr 1fr 1fr 1.1fr;
+      gap: 16px;
       align-items: start;
       margin-top: 40px;
     }
-
-    .step:nth-child(1) { margin-top: 0; }
-    .step:nth-child(2) { margin-top: 44px; }
-    .step:nth-child(3) { margin-top: 88px; }
-    .step:nth-child(4) { margin-top: 132px; }
 
     .step {
       background: var(--white);
