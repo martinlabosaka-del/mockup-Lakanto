@@ -234,7 +234,13 @@
     .btn-cta-sm { font-size: clamp(12px, 1.4vw, 14px); font-weight: 700; opacity: .95; letter-spacing: .04em; }
     .btn-cta-lg { font-size: clamp(18px, 2.6vw, 26px); font-weight: 900; letter-spacing: .02em; }
 
-    .cta-under { font-size: 12px; color: var(--gray); margin-top: 10px; }
+    /* 赤いボタンとおおよそ同じ幅で収まるサイズ */
+    .cta-under {
+      font-size: clamp(13px, 1.55vw, 16px);
+      font-weight: 500;
+      color: #6B5A52;
+      margin-top: 12px;
+    }
 
     /* FV下の斜め帯 */
     .fv-strip {
@@ -857,10 +863,10 @@
     <div class="worry-box anim">
       <ul class="worry-list">
         <li class="worry-item"><span class="worry-check"></span><span>ランチのあと、<span class="marker">どうしようもなく眠くなる</span></span></li>
-        <li class="worry-item"><span class="worry-check"></span><span>午後の会議や作業で、集中力が続かない</span></li>
+        <li class="worry-item"><span class="worry-check"></span><span>午後の会議や作業で、<span class="marker">集中力が続かない</span></span></li>
         <li class="worry-item"><span class="worry-check"></span><span>しっかり寝ているのに、<span class="marker">だるさが抜けない</span></span></li>
-        <li class="worry-item"><span class="worry-check"></span><span>食べたばかりなのに、また甘いものが欲しくなる</span></li>
-        <li class="worry-item"><span class="worry-check"></span><span>健康診断で、血糖値のことを言われたことがある</span></li>
+        <li class="worry-item"><span class="worry-check"></span><span>食べたばかりなのに、<span class="marker">また甘いものが欲しくなる</span></span></li>
+        <li class="worry-item"><span class="worry-check"></span><span>健康診断で、<span class="marker">血糖値のことを言われたことがある</span></span></li>
       </ul>
 
       <p class="worry-after">ひとつでも当てはまったら</p>
