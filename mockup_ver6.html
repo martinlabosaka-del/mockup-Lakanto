@@ -505,14 +505,8 @@
       padding: 3px 10px; border-radius: 3px;
       margin-bottom: 6px;
     }
-    .doc-quote.is-placeholder .doc-bubble {
-      background: transparent;
-      border-style: dashed;
-      border-color: var(--gray-light);
-      color: var(--gray);
-    }
-    .doc-quote.is-placeholder .doc-bubble::before { display: none; }
-    .doc-quote.is-placeholder .doc-cite { color: var(--gray-light); }
+    /* 吹き出し自体は本番どおりの見た目にして、
+       赤いタグと伏字の出典だけで仮であることを示す */
     .doc-bubble::before {
       content: '';
       position: absolute; left: -13px; top: 30px;
@@ -974,8 +968,9 @@
         <figure class="doc-quote is-placeholder">
           <span class="doc-quote-tag">差し替え予定</span>
           <blockquote class="doc-bubble">
-            ここに、山田悟先生の著書またはインタビューから「糖質疲労」の説明にあたる一節を引用します。
-            分量はこの程度（3〜4行）を想定しています。実際の文言が決まりしだい差し替えてください。
+            食後に強い眠気やだるさを感じる方は、けっして少なくありません。
+            多くの方が年齢や睡眠のせいだと考えていますが、食事による血糖の変動が関わっていることがあります。
+            大切なのは、糖質をいっさいとらないことではなく、とり方を変えることです。
           </blockquote>
           <figcaption class="doc-cite">出典：『◯◯◯◯◯◯』（◯◯出版・20◯◯年）</figcaption>
         </figure>
