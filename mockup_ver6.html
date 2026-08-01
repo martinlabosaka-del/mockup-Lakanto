@@ -94,7 +94,7 @@
     #worry { padding: 52px 0 44px; }   /* 悩み提示は短く畳んで次へ送る */
     #about { padding: 56px 0 48px; }
     #graph { padding: 48px 0 72px; }   /* 図解は下を広めに取って一拍おく */
-    #doctor { padding: 72px 0; }       /* 監修医は独立した面として見せる */
+    #doctor { padding: 72px 0; }       /* 提唱者の紹介は独立した面として見せる */
     #qa { padding: 56px 0 64px; }
 
 
@@ -442,7 +442,7 @@
       font-family: 'Inter', sans-serif; font-weight: 700; font-size: .9em; line-height: 1;
     }
 
-    /* ===== 監修医 ===== */
+    /* ===== 提唱者（山田悟先生） ===== */
     #doctor { background: var(--cream); }
 
     .doc-wrap {
@@ -462,9 +462,20 @@
     }
     .doc-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 
+    .doc-lead {
+      display: inline-block;
+      background: var(--accent); color: #fff;
+      font-size: 12px; font-weight: 700; letter-spacing: .04em;
+      padding: 4px 14px; border-radius: 4px;
+      margin-bottom: 10px;
+    }
     .doc-role { font-size: 13px; color: var(--gray); line-height: 1.7; }
     .doc-name { font-size: clamp(22px, 3vw, 30px); font-weight: 900; margin: 2px 0 14px; }
     .doc-name span { font-size: .5em; font-weight: 700; margin-left: 8px; color: var(--gray); }
+
+    /* 引用ブロック。監修ではなく「提唱者の言葉の引用」なので、
+       必ず出典（figcaption）とセットで出す */
+    .doc-quote { position: relative; }
 
     .doc-bubble {
       position: relative;
@@ -474,8 +485,34 @@
       padding: 18px 20px;
       font-size: clamp(14px, 1.6vw, 16px);
       line-height: 1.95;
-      margin-bottom: 16px;
     }
+
+    .doc-cite {
+      font-size: 12px;
+      color: var(--gray);
+      text-align: right;
+      margin-top: 8px;
+    }
+
+    /* ----- 仮テキストであることを見た目で明示する -----
+       実文言に差し替えるときは HTML から is-placeholder を外すだけでよい */
+    .doc-quote-tag { display: none; }
+
+    .doc-quote.is-placeholder .doc-quote-tag {
+      display: inline-block;
+      background: var(--accent); color: #fff;
+      font-size: 11px; font-weight: 700; letter-spacing: .04em;
+      padding: 3px 10px; border-radius: 3px;
+      margin-bottom: 6px;
+    }
+    .doc-quote.is-placeholder .doc-bubble {
+      background: transparent;
+      border-style: dashed;
+      border-color: var(--gray-light);
+      color: var(--gray);
+    }
+    .doc-quote.is-placeholder .doc-bubble::before { display: none; }
+    .doc-quote.is-placeholder .doc-cite { color: var(--gray-light); }
     .doc-bubble::before {
       content: '';
       position: absolute; left: -13px; top: 30px;
@@ -918,7 +955,7 @@
   <div class="dot-group"><div class="dot sm"></div><div class="dot"></div><div class="dot lg"></div></div>
 </div>
 
-<!-- ===== 監修医 ===== -->
+<!-- ===== 提唱者（山田悟先生） ===== -->
 <section class="sec" id="doctor">
   <div class="container">
     <h2 class="sec-h">「糖質疲労」を提唱する<br>糖尿病専門医</h2>
@@ -928,13 +965,20 @@
         <img src="sozai/yamadasatoru.jpg" alt="山田悟先生">
       </div>
       <div class="doc-text">
+        <p class="doc-lead">「糖質疲労」提唱者</p>
         <p class="doc-role">北里研究所病院 糖尿病センター長<br>一般社団法人 食・楽・健康協会 代表理事</p>
         <p class="doc-name">山田 悟<span>やまだ さとる</span></p>
-        <div class="doc-bubble">
-          食後の眠気やだるさを「気のせい」で済ませてしまう方は、本当に多いです。
-          でもそれは、体からのサイン。血糖値の急な上がり下がりは、その日の集中力を奪うだけでなく、
-          何年もかけて体にも効いてきます。まずは、自分が何をどう食べているかを知るところから。
-        </div>
+        <!-- TODO: 山田悟先生の著書・インタビューの実際の一節に差し替える。
+             あわせて .doc-quote から is-placeholder を外し、
+             figcaption に実際の書名・出版社・発行年（可能ならページ）を入れる。 -->
+        <figure class="doc-quote is-placeholder">
+          <span class="doc-quote-tag">差し替え予定</span>
+          <blockquote class="doc-bubble">
+            ここに、山田悟先生の著書またはインタビューから「糖質疲労」の説明にあたる一節を引用します。
+            分量はこの程度（3〜4行）を想定しています。実際の文言が決まりしだい差し替えてください。
+          </blockquote>
+          <figcaption class="doc-cite">出典：『◯◯◯◯◯◯』（◯◯出版・20◯◯年）</figcaption>
+        </figure>
       </div>
     </div>
   </div>
@@ -995,7 +1039,7 @@
         <a href="#worry">こんなお悩み</a>
         <a href="#about">糖質疲労とは</a>
         <a href="#graph">しくみ</a>
-        <a href="#doctor">監修医</a>
+        <a href="#doctor">提唱者</a>
         <a href="mockup_ver6_check.html">糖質疲労チェック</a>
       </nav>
     </div>
@@ -1034,7 +1078,7 @@
       '.worry-item > span:last-child', '.worry-after',
       '.about-statement', '.about-card p',
       '.graph-caption',
-      '.doc-role', '.doc-bubble',
+      '.doc-role', '.doc-bubble', '.doc-cite',
       '.cta-catch', '.cta-sub', '.cta-note', '.cta-under',
       '.qa-a', '.footer-disclaimer'
     ].join(',');
