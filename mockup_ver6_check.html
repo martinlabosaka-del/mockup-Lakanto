@@ -88,17 +88,6 @@
 
     .check-head { text-align: center; margin-bottom: 28px; }
 
-    .check-label {
-      display: inline-block;
-      background: var(--accent);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      padding: 5px 16px;
-      border-radius: 999px;
-      margin-bottom: 12px;
-    }
 
     .check-title {
       font-size: clamp(24px, 4vw, 36px);
@@ -169,15 +158,6 @@
 
     .q-inner { animation: qIn 0.35s ease-out; }
 
-    .q-num {
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: 0.12em;
-      text-align: center;
-      margin-bottom: 10px;
-    }
 
     .q-text {
       font-size: clamp(19px, 2.8vw, 26px);
@@ -387,7 +367,8 @@
   <div class="container">
 
     <div class="check-head">
-      <span class="check-label">1 MIN CHECK</span>
+
+
       <h1 class="check-title">あなたの<span class="marker">糖質疲労度</span>チェック</h1>
       <p class="check-sub">直感でOK。10個の質問に答えてください。</p>
     </div>
@@ -403,7 +384,8 @@
 
       <div class="q-card">
         <div class="q-inner" id="q-inner">
-          <p class="q-num" id="q-num">QUESTION 1</p>
+
+
           <p class="q-text" id="q-text">質問文</p>
           <div class="q-choices" id="q-choices"></div>
         </div>
@@ -456,7 +438,7 @@
   var idx = 0;
   var answers = new Array(QUESTIONS.length).fill(null);
 
-  var elNum     = document.getElementById('q-num');
+
   var elText    = document.getElementById('q-text');
   var elChoices = document.getElementById('q-choices');
   var elInner   = document.getElementById('q-inner');
@@ -528,7 +510,6 @@
   }
 
   function render() {
-    elNum.textContent = 'QUESTION ' + (idx + 1);
     elText.textContent = QUESTIONS[idx];
     bd(elText); // 質問文は毎回入れ替わるので、描画のたびに適用する
 
