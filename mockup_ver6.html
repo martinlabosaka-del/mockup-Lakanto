@@ -234,11 +234,16 @@
     .btn-cta-sm { font-size: clamp(12px, 1.4vw, 14px); font-weight: 700; opacity: .95; letter-spacing: .04em; }
     .btn-cta-lg { font-size: clamp(18px, 2.6vw, 26px); font-weight: 900; letter-spacing: .02em; }
 
-    /* 赤いボタンとおおよそ同じ幅で収まるサイズ */
+    /* ボタンと補足文をひとまとまりにする。
+       inline-block なので幅は中で一番広い要素＝ボタンに合い、
+       補足文はその幅の中でセンター揃えになる */
+    .fv-cta { display: inline-block; }
+
     .cta-under {
-      font-size: clamp(13px, 1.55vw, 16px);
+      font-size: clamp(11.5px, 1.25vw, 13.5px);
       font-weight: 500;
       color: #6B5A52;
+      text-align: center;
       margin-top: 12px;
     }
 
@@ -692,6 +697,7 @@
 
       .fv-text { max-width: none; text-align: center; }
       .fv-catch { text-shadow: 0 2px 8px rgba(255,253,248,.9); }
+      .fv-cta { display: block; }
       .btn-cta { width: 100%; padding: 16px 20px; }
 
       .worry-box { padding: 26px 20px; }
@@ -841,14 +847,16 @@
         年のせい、寝不足のせい。そう片づける前に。<br>
         原因は、お昼に食べた<b>「あれ」</b>かもしれません。
       </p>
-      <a href="mockup_ver6_check.html" class="btn-cta">
-        <span class="btn-cta-sm">かんたん10問・無料</span>
-        <span class="btn-cta-lg">1分で糖質疲労チェック</span>
-      </a>
-      <p class="cta-under">
-        <svg class="tri" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg>
-        質問に答えるだけで、あなたの糖質疲労度が分かります
-      </p>
+      <div class="fv-cta">
+        <a href="mockup_ver6_check.html" class="btn-cta">
+          <span class="btn-cta-sm">かんたん10問・無料</span>
+          <span class="btn-cta-lg">1分で糖質疲労チェック</span>
+        </a>
+        <p class="cta-under">
+          <svg class="tri" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg>
+          質問に答えるだけで、あなたの糖質疲労度が分かります
+        </p>
+      </div>
     </div>
   </div>
 
@@ -1037,7 +1045,7 @@
         <a href="#worry">こんなお悩み</a>
         <a href="#about">糖質疲労とは</a>
         <a href="#graph">しくみ</a>
-        <a href="#doctor">提唱者</a>
+
         <a href="mockup_ver6_check.html">糖質疲労チェック</a>
       </nav>
     </div>

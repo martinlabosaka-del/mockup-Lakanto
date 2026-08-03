@@ -70,13 +70,22 @@
       letter-spacing: 0.02em;
     }
 
+    /* トップに戻る導線。主役のCTAと競らないよう、
+       塗りつぶしではなく輪郭のボタンにする */
     .btn-back-top {
+      display: inline-block;
+      background: var(--white);
+      border: 2px solid var(--accent);
+      color: var(--accent);
       font-size: 13px;
-      color: var(--gray);
+      font-weight: 700;
+      padding: 7px 18px;
+      border-radius: 999px;
       text-decoration: none;
-      transition: color 0.2s;
+      white-space: nowrap;
+      transition: background 0.2s, color 0.2s;
     }
-    .btn-back-top:hover { color: var(--accent); }
+    .btn-back-top:hover { background: var(--accent); color: #fff; }
 
     /* ===== MAIN ===== */
     main {
