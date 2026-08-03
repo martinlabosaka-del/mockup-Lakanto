@@ -709,7 +709,10 @@
         align-items: flex-end;
       }
 
-      .fv-text { max-width: none; text-align: center; }
+      /* .fv-inner は横並びのflex。width を指定しないと .fv-text が
+         内容の幅までしか広がらず左端に寄るため、必ず全幅にする。
+         （text-align:center だけでは「狭い箱の中で中央」にしかならない） */
+      .fv-text { max-width: none; width: 100%; text-align: center; }
       .fv-catch { text-shadow: 0 2px 8px rgba(255,253,248,.9); }
       .fv-cta { display: block; }
       .btn-cta { width: 100%; padding: 16px 20px; }
