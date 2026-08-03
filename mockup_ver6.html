@@ -688,7 +688,11 @@
       /* 画面が狭くなっても、文字は写真の上に乗せたまま。
          人物の顔が隠れないよう、テキストは下寄せにして
          下から立ち上がるグラデーションを敷いて読みやすさを確保する */
-      .fv-photo img { object-position: 76% 14%; }
+      /* 写真を1.2倍に拡大して、人物の上の余白を減らす。
+         この写真は横長なので、縦長のスマホ画面では縦方向にはみ出しが起きず、
+         object-position の縦の値が効かない。拡大して寄るしかないためこの指定にしている */
+      .fv-photo { top: -11%; height: 120%; }
+      .fv-photo img { object-position: 70% center; }
 
       .fv::after {
         background: linear-gradient(0deg,
