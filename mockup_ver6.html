@@ -274,7 +274,16 @@
       position: relative;
     }
 
-    .worry-list { list-style: none; display: grid; gap: 14px; }
+    /* いちばん長い項目に合わせて幅を決め、その塊ごと中央に置く。
+       項目自体は左揃えのままなので、チェックボックスは縦一直線に並ぶ */
+    .worry-list {
+      list-style: none;
+      display: grid;
+      gap: 14px;
+      width: fit-content;
+      max-width: 100%;
+      margin: 0 auto;
+    }
 
     .worry-item {
       display: flex; align-items: flex-start; gap: 14px;
